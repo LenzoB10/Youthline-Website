@@ -7,7 +7,7 @@ This repository serves as a starter kit for building systems at the Malawi Unive
 - **Laravel 12**: Latest Laravel framework for robust backend development.
 - **Inertia.js v2**: Seamless integration of Vue.js with Laravel for building single-page applications.
 - **Vue 3**: Modern reactive frontend framework with Composition API support.
-- **Tailwind CSS 3**: Utility-first CSS framework for designing modern user interfaces.
+- **Tailwind CSS 4**: Utility-first CSS framework for designing modern user interfaces.
 - **Authentication**: Managed via Laravel Sanctum and Google OAuth.
 - **Role and Permission Management**: Powered by Spatie's Laravel Permission package.
 - **Media Management**: Handled by Spatie's Laravel Media Library.
