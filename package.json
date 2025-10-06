@@ -29,8 +29,6 @@
         "vue": "^3.4.0"
     },
     "dependencies": {
-        "datatables.net": "^2.3.0",
-        "datatables.net-vue3": "^3.0.4",
         "date-fns": "^4.1.0",
         "lucide-vue-next": "^0.544.0",
         "pinia": "^3.0.2",
