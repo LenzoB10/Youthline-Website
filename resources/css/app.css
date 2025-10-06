@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles */
+
+.card-container {
+    @apply bg-background-card p-4 shadow-md dark:bg-background-dark-card rounded-lg
+}
+
+.page-heading {
+    @apply mb-3 text-2xl font-bold text-mustBlue dark:text-text-dark-muted;
+}
+.page-heading-2 {
+    @apply mb-3 text-xl font-bold text-mustBlue dark:text-text-dark-muted;
+}
+
+.text-input {
+    @apply rounded-lg border border-gray-400 px-4 py-1.5 text-sm text-text-base placeholder-gray-400 shadow-sm transition-colors duration-200 focus:border-accent focus:ring-1 focus:ring-accent/50 dark:border-gray-600 dark:bg-background-dark-card dark:text-text-inverted dark:placeholder-gray-500 dark:focus:border-accent dark:focus:ring-accent/30;
+}
+
+.checkbox-input {
+    @apply rounded-sm border border-gray-400 dark:border-text-muted text-text-base shadow-sm transition-colors duration-200 focus:border-accent focus:ring-0 dark:bg-transparent dark:text-text-muted dark:focus:bg-mustGreen;
+}
+.checkbox-input:checked {
+    @apply bg-mustGreen;
+}
+
+.btn-primary {
+    @apply hover:bg-mustGreen focus:bg-mustGreen inline-flex items-center rounded-md border border-transparent bg-mustGreen px-4 py-2 text-xs font-semibold uppercase tracking-widest text-text-inverted transition duration-150 ease-in-out focus:outline-none focus:ring-1 focus:ring-mustGreen focus:ring-offset-1 dark:text-text-inverted dark:focus:ring-offset-background-dark-card;
+}
+.btn-primary-sm {
+    @apply hover:bg-mustGreen focus:bg-mustGreen inline-flex items-center rounded-md border border-transparent bg-mustGreen px-2 py-1 text-xs font-semibold uppercase tracking-widest text-text-inverted transition duration-150 ease-in-out focus:outline-none focus:ring-1 focus:ring-mustGreen focus:ring-offset-2 dark:text-text-inverted dark:focus:ring-offset-background-dark-card;
+}
+.btn-danger-sm {
+    @apply hover:bg-red-500 focus:bg-red-500 inline-flex items-center rounded-md border border-transparent bg-red-500 px-2 py-1 text-xs font-semibold uppercase tracking-widest text-text-inverted transition duration-150 ease-in-out focus:outline-none focus:ring-1 focus:ring-red-500 focus:ring-offset-2 dark:text-text-inverted dark:focus:ring-offset-background-dark-card;
+}
+
+.btn-outline {
+    @apply hover:bg-mustGreen/10 inline-flex items-center rounded-md border bg-transparent border-text-muted px-4 py-2 text-xs font-semibold uppercase tracking-widest transition duration-150 ease-in-out focus:outline-none focus:ring-1 focus:ring-mustGreen focus:ring-offset-1 dark:text-text-inverted dark:focus:ring-offset-background-dark-card;
+}
+.btn-outline-sm {
+    @apply hover:bg-mustGreen/10 inline-flex items-center rounded-md border bg-transparent border-text-muted px-2 py-1 text-xs font-semibold uppercase tracking-widest transition duration-150 ease-in-out focus:outline-none focus:ring-1 focus:ring-mustGreen focus:ring-offset-1 dark:text-text-inverted dark:focus:ring-offset-background-dark-card;
+}
+
+.btn-secondary {
+    @apply hover:bg-mustBlue focus:bg-mustBlue inline-flex items-center rounded-md border border-transparent bg-mustBlue px-4 py-2 text-xs font-semibold uppercase tracking-widest text-text-inverted transition duration-150 ease-in-out focus:outline-none focus:ring-1 focus:ring-mustBlue focus:ring-offset-2 dark:text-text-inverted dark:focus:ring-offset-background-dark-card;
+}
+
+.modal-title {
+    @apply text-lg font-semibold text-mustBlue dark:text-text-inverted;
+}
+
+.modal-title-close-icon {
+    @apply size-5 cursor-pointer text-gray-500 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-600;
+}
+
+.rounded-display {
+    @apply rounded-md bg-gray-200 px-3 py-1 text-xs text-gray-800 dark:bg-accent/10 dark:text-mustText-light;
+}
+
+.action-icon {
+    @apply text-mustBlue transition duration-300 hover:text-mustBlue/80 dark:text-mustText-muted;
+}
+
+/* End custom styles */
