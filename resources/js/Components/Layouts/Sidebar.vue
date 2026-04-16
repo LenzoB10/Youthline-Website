@@ -18,7 +18,7 @@
             ]">
             <a href="/" class="flex flex-shrink-0 items-center gap-2 px-6 py-4 text-2xl font-bold text-text-inverted">
                 <img src="/imgs/logo/must-logo-white.png" alt="Logo" class="w-9" />
-                <span>ReDMIS</span>
+                <span>MUST</span>
             </a>
             <nav class="flex-grow overflow-y-auto px-3 pb-4">
                 <ul class="space-y-2">

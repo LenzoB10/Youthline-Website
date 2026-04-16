@@ -59,7 +59,6 @@ class UsersController extends Controller implements HasMiddleware
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'account_type' => $request->account_type,
             'password' => Hash::make($password),
         ]);
 

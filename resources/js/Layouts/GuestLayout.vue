@@ -44,7 +44,7 @@ const themeStore = useThemeStore();
                         alt=""
                         class="w-16"
                     />
-                    <h1 class="mt-2">ReDMIS</h1>
+                    <h1 class="mt-2">MUST</h1>
                 </div>
                 <slot />
             </div>
