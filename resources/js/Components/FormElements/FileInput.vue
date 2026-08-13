@@ -106,7 +106,7 @@ function addFiles(newFiles) {
     let currentFiles = [...files.value];
     for (const file of newFiles) {
         if (file.size > props.maxFileSize) {
-            toast.error(`File \"${file.name}\" exceeds the maximum size of ${Math.round(props.maxFileSize / (1024 * 1024))}MB.`, {
+            toast.error(`File "${file.name}" exceeds the maximum size of ${Math.round(props.maxFileSize / (1024 * 1024))}MB.`, {
                 theme: theme.darkMode === true ? 'dark' : 'light',
                 transition: toast.TRANSITIONS.SLIDE,
                 position: toast.POSITION.BOTTOM_RIGHT,
@@ -114,7 +114,7 @@ function addFiles(newFiles) {
             continue;
         }
         if (!isAcceptedFileType(file)) {
-            toast.error(`File \"${file.name}\" has an invalid file type.`, {
+            toast.error(`File "${file.name}" has an invalid file type.`, {
                 theme: theme.darkMode === true ? 'dark' : 'light',
                 transition: toast.TRANSITIONS.SLIDE,
                 position: toast.POSITION.BOTTOM_RIGHT,
@@ -125,7 +125,7 @@ function addFiles(newFiles) {
         const isDuplicate = currentFiles.some(f => f.name === file.name && f.size === file.size) ||
             props.alreadyUploadedFiles.some(f => f.name === file.name && f.size === file.size);
         if (isDuplicate) {
-            toast.error(`File \"${file.name}\" is already in the list.`, {
+            toast.error(`File "${file.name}" is already in the list.`, {
                 theme: theme.darkMode === true ? 'dark' : 'light',
                 transition: toast.TRANSITIONS.SLIDE,
                 position: toast.POSITION.BOTTOM_RIGHT,

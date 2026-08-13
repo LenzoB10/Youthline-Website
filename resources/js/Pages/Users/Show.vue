@@ -422,15 +422,15 @@ const closeModal = () => {
                         class="overflow-auto rounded bg-gray-100 p-3 text-xs text-gray-800 dark:bg-background-dark-soft dark:text-text-inverted"
                         v-text="selectedLog.description"
                     ></pre>
-                    <p v-if="selectedLog.properties != []">
+                    <p v-if="selectedLog.properties != [] || selectedLog.attribute_changes != []">
                         <strong class="font-semibold text-text-dark-muted"
                             >Changes</strong
                         >
                     </p>
                     <pre
-                        v-if="selectedLog.properties != []"
+                        v-if="selectedLog.properties != [] || selectedLog.attribute_changes != []"
                         class="overflow-auto rounded bg-gray-100 p-3 text-xs text-gray-800 dark:bg-background-dark-soft dark:text-text-inverted"
-                        v-text="JSON.stringify(selectedLog.properties, null, 2)"
+                        v-text="JSON.stringify({ ...selectedLog.properties, ...selectedLog.attribute_changes }, null, 2)"
                     ></pre>
                 </div>
             </div>

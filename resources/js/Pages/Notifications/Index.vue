@@ -172,6 +172,8 @@ const hasNotifications = computed(() => props.notifications.length > 0);
 </template>
 
 <style scoped>
+@reference '../../../css/app.css';
+
 .action-icon {
     @apply p-1 rounded-full text-text-muted hover:text-accent dark:hover:text-accent-dark transition-colors focus:outline-none focus:ring-2 focus:ring-accent;
 }

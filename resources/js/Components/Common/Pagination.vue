@@ -1,6 +1,6 @@
 <script setup>
 
-const props = defineProps({
+defineProps({
     links: {
         type: Array,
         required: true

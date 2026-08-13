@@ -1,6 +1,43 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@plugin '@tailwindcss/forms';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+    --font-sans:
+        'Figtree', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+        'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+
+    --color-mustBlue: #10274a;
+    --color-mustGreen: #55b166;
+
+    --color-background: #f9fafb;
+    --color-background-soft: #f1f1f1;
+    --color-background-card: #ffffff;
+    --color-background-dark: #0f0f0f;
+    --color-background-dark-soft: #181818;
+    --color-background-dark-card: #212121;
+
+    --color-text-base: #0f0f0f;
+    --color-text-muted: #606060;
+    --color-text-inverted: #f3f4f6;
+    --color-text-dark-muted: #aaaaaa;
+
+    --color-accent: #55b166;
+    --color-accent-light: #86efac;
+    --color-accent-dark: #15803d;
+
+    --color-mustText-base: #10274a;
+    --color-mustText-muted: #c7cdd3;
+    --color-mustText-light: #e0e6ed;
+
+    --color-mustBorder-light: #e5e7eb;
+    --color-mustBorder-dark: #334155;
+}
 
 /* Custom styles */
 

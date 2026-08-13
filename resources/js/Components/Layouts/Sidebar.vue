@@ -81,26 +81,10 @@ import { onMounted, onBeforeUnmount, ref, computed } from "vue";
 import {
     Home,
     Settings,
-    BarChart,
     ChevronDown,
     User,
     Shield,
     Activity,
-    Bell,
-    Building,
-    Truck,
-    FileText,
-    ClipboardList,
-    Map,
-    CheckCircle,
-    ThumbsUp,
-    Car,
-    CarFront,
-    Wrench,
-    Users,
-    Store,
-    Droplet,
-    Fuel,
     BellIcon,
 } from "lucide-vue-next";
 
@@ -109,7 +93,6 @@ import { Link } from "@inertiajs/vue3";
 import { usePage } from "@inertiajs/vue3";
 
 const { url: currentUrl } = usePage();
-const page = usePage();
 
 const sidebar = useSidebarStore();
 

@@ -4,7 +4,7 @@ import { ref, computed } from 'vue';
 import TextInput from './TextInput.vue';
 import { Eye, EyeOff } from 'lucide-vue-next';
 
-const props = defineProps({
+defineProps({
     modelValue: {
         type: String,
         default: '',
@@ -15,7 +15,7 @@ const props = defineProps({
     },
 });
 
-const emit = defineEmits(['update:modelValue']);
+defineEmits(['update:modelValue']);
 const showPassword = ref(false);
 
 const inputType = computed(() => (showPassword.value ? 'text' : 'password'));

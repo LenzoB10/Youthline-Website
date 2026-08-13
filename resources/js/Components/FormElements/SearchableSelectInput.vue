@@ -139,7 +139,7 @@ const positionDropdown = () => {
 
     // Default to opening below
     let top = selectRect.height;
-    let maxHeight = '200px';
+    let maxHeight;
 
     // If there's not enough space below but more space above, open upwards
     if (spaceBelow < dropdownHeight && spaceAbove > spaceBelow) {

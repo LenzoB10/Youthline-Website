@@ -378,6 +378,7 @@ const updateData = () => {
     } else {
         // Sort data if needed
         if (sortBy.value) {
+            // eslint-disable-next-line vue/no-mutating-props
             props.data.sort((a, b) => {
                 const aValue = getNestedValue(a, sortBy.value);
                 const bValue = getNestedValue(b, sortBy.value);
