@@ -3,11 +3,12 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use Laravel\Socialite\Facades\Socialite;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
+use Laravel\Socialite\Facades\Socialite;
 
 class GoogleAuthController extends Controller
 {
@@ -16,8 +17,10 @@ class GoogleAuthController extends Controller
         return Socialite::driver('google')->redirect();
     }
 
-    public function handleGoogleCallback()
+    public function handleGoogleCallback(): RedirectResponse
     {
+        $user = null;
+
         try {
             $googleUser = Socialite::driver('google')->user();
 
@@ -46,7 +49,7 @@ class GoogleAuthController extends Controller
                 Auth::logout();
 
                 throw ValidationException::withMessages([
-                    'email' => 'You account was banned.'
+                    'email' => 'You account was banned.',
                 ]);
             }
 
@@ -54,13 +57,14 @@ class GoogleAuthController extends Controller
 
             return redirect()->intended('/dashboard');
         } catch (\Exception $e) {
-            Log::error('Google Auth Error: ' . $e->getMessage());
+            Log::error('Google Auth Error: '.$e->getMessage());
 
-            if($user->status == "Banned"){
+            if ($user?->status === 'Banned') {
                 return redirect()->route('login')->with([
                     'error' => 'Unable to login. Your account was Banned',
                 ]);
             }
+
             return redirect()->route('login')->with([
                 'error' => 'Unable to login using Google. Please try again.',
             ]);

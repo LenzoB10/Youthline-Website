@@ -5,23 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controllers\HasMiddleware;
-use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Routing\Attributes\Controllers\Middleware;
 
-class UserRolesAndPermissionsController extends Controller implements HasMiddleware
+#[Middleware('permission:add user permissions', only: ['changePermissions'])]
+#[Middleware('permission:update user role', only: ['changeRole'])]
+class UserRolesAndPermissionsController extends Controller
 {
-    public static function middleware()
-    {
-        return [
-            new Middleware('permission:add user permissions', only: ['changePermissions']),
-            new Middleware('permission:update user role', only: ['changeRole'])
-        ];
-    }
-
     public function changeRole(Request $request, User $user): RedirectResponse
     {
         $request->validate([
-            'role' => 'required|exists:roles,name'
+            'role' => 'required|exists:roles,name',
         ]);
 
         $user->syncRoles($request->{'role'});
@@ -35,7 +28,7 @@ class UserRolesAndPermissionsController extends Controller implements HasMiddlew
             ->causedBy($request->user())
             ->withProperties([
                 'old_role' => $user->roles->pluck('name')->toArray(),
-                'new_role' => $request->role
+                'new_role' => $request->role,
             ])
             ->log('User role updated');
 
@@ -47,7 +40,7 @@ class UserRolesAndPermissionsController extends Controller implements HasMiddlew
     public function changePermissions(Request $request, User $user): RedirectResponse
     {
         $request->validate([
-            'permissions' => 'required|array|min:1'
+            'permissions' => 'required|array|min:1',
         ]);
 
         $user->syncPermissions($request->{'permissions'});
@@ -61,7 +54,7 @@ class UserRolesAndPermissionsController extends Controller implements HasMiddlew
             ->causedBy($request->user())
             ->withProperties([
                 'old_permissions' => $user->permissions->pluck('name')->toArray(),
-                'new_permissions' => $request->permissions
+                'new_permissions' => $request->permissions,
             ])
             ->log('User permissions updated');
 

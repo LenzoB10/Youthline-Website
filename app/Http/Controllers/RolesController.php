@@ -2,28 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controllers\HasMiddleware;
-use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Routing\Attributes\Controllers\Middleware;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Inertia\Response;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
-class RolesController extends Controller implements HasMiddleware
+// permission:list roles - intentionally left unrestricted
+#[Middleware('permission:see role details', only: ['show'])]
+#[Middleware('permission:add role', only: ['create', 'store'])]
+#[Middleware('permission:update role', only: ['edit', 'update'])]
+#[Middleware('permission:delete role', only: ['destroy'])]
+class RolesController extends Controller
 {
-    public static function middleware(): array
-    {
-        return [
-            // new Middleware('permission:list roles', only: ['index']),
-            new Middleware('permission:see role details', only: ['show']),
-            new Middleware('permission:add role', only: ['create', 'store']),
-            new Middleware('permission:update role', only: ['edit', 'update']),
-            new Middleware('permission:delete role', only: ['destroy']),
-        ];
-    }
-
-    public function index()
+    public function index(): Response
     {
         $roles = Role::withCount('users')
             ->with('permissions')
@@ -55,7 +50,7 @@ class RolesController extends Controller implements HasMiddleware
         ]);
     }
 
-    public function show(Role $role)
+    public function show(Role $role): Response
     {
 
         $role->load('permissions', 'users');
@@ -63,7 +58,7 @@ class RolesController extends Controller implements HasMiddleware
         return Inertia::render('Roles/Show', compact('role'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $request->validate([
             'name' => 'required|unique:roles,name',
@@ -90,7 +85,7 @@ class RolesController extends Controller implements HasMiddleware
         return redirect()->route('admin.roles.index');
     }
 
-    public function update(Request $request, Role $role)
+    public function update(Request $request, Role $role): RedirectResponse
     {
         $request->validate([
             'name' => 'required|unique:roles,name,'.$role->id,
@@ -140,7 +135,7 @@ class RolesController extends Controller implements HasMiddleware
         return redirect()->route('admin.roles.index');
     }
 
-    public function destroy(Role $role)
+    public function destroy(Role $role): RedirectResponse
     {
         if ($role->name === 'Admin' || $role->name === 'Registrar' || $role->name === 'Transport Officer' || $role->name === 'HoD') {
             session()->flash('error', 'You cannot delete the system role');

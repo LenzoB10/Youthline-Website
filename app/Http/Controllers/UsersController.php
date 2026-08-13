@@ -3,34 +3,30 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateUsersRequest;
-use App\Models\User;
-use App\Traits\HasDataTable;
 use App\Http\Requests\DatatableRequest;
+use App\Models\User;
 use App\Notifications\AccountStatusUpdatedNotification;
 use App\Notifications\UserCreatedPasswordNotification;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
+use App\Traits\HasDataTable;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Routing\Attributes\Controllers\Middleware;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use Illuminate\Routing\Controllers\HasMiddleware;
-use Illuminate\Routing\Controllers\Middleware;
+use Inertia\Response;
+use Spatie\Activitylog\Models\Activity;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
-class UsersController extends Controller implements HasMiddleware
+#[Middleware('permission:list users', only: ['index'])]
+#[Middleware('permission:see user details', only: ['show'])]
+#[Middleware('permission:add user', only: ['store'])]
+#[Middleware('permission:update user', only: ['edit', 'update'])]
+#[Middleware('permission:suspend user', only: ['activate', 'ban'])]
+class UsersController extends Controller
 {
     use HasDataTable;
 
-    public static function middleware(): array
-    {
-        return [
-            new Middleware('permission:list users', only: ['index']),
-            new Middleware('permission:see user details', only: ['show']),
-            new Middleware('permission:add user', only: ['store']),
-            new Middleware('permission:update user', only: ['edit', 'update']),
-            new Middleware('permission:suspend user', only: ['activate', 'ban'])
-        ];
-    }
-
-    public function index(DatatableRequest $request)
+    public function index(DatatableRequest $request): Response
     {
         $query = User::query();
 
@@ -48,11 +44,11 @@ class UsersController extends Controller implements HasMiddleware
         return inertia('Users/Index', [
             'users' => $users,
             'filters' => $request->all(),
-            'roles' => fn() => Role::get(['id', 'name']), //optional, only called when needed
+            'roles' => fn () => Role::get(['id', 'name']), // optional, only called when needed
         ]);
     }
 
-    public function store(CreateUsersRequest $request)
+    public function store(CreateUsersRequest $request): RedirectResponse
     {
         $password = Str::password(16);
 
@@ -71,12 +67,12 @@ class UsersController extends Controller implements HasMiddleware
         return redirect()->route('admin.users.index');
     }
 
-    public function show(User $user)
+    public function show(User $user): Response
     {
         $roles = Role::all()->map(function ($role) {
             return [
                 'id' => $role->id,
-                'name' => $role->name
+                'name' => $role->name,
             ];
         });
 
@@ -84,7 +80,7 @@ class UsersController extends Controller implements HasMiddleware
             return Permission::all()->map(function ($permission) {
                 return [
                     'id' => $permission->id,
-                    'name' => $permission->name
+                    'name' => $permission->name,
                 ];
             });
         });
@@ -94,18 +90,18 @@ class UsersController extends Controller implements HasMiddleware
         $user_permissions_via_role = $user->getPermissionsViaRoles()->map(function ($permission) {
             return [
                 'id' => $permission->id,
-                'name' => $permission->name
+                'name' => $permission->name,
             ];
         });
 
         $user_direct_permissions = $user->getDirectPermissions()->map(function ($permission) {
             return [
                 'id' => $permission->id,
-                'name' => $permission->name
+                'name' => $permission->name,
             ];
         });
 
-        $logs = \Spatie\Activitylog\Models\Activity::where('causer_id', $user->id)->latest()->get();
+        $logs = Activity::where('causer_id', $user->id)->latest()->get();
 
         return inertia('Users/Show', [
             'user' => $user,
@@ -117,7 +113,7 @@ class UsersController extends Controller implements HasMiddleware
         ]);
     }
 
-    public function update(CreateUsersRequest $request, User $user)
+    public function update(CreateUsersRequest $request, User $user): RedirectResponse
     {
         $user->update([
             'name' => $request->name,
@@ -131,7 +127,7 @@ class UsersController extends Controller implements HasMiddleware
         return redirect()->route('admin.users.index');
     }
 
-    public function destroy(User $user)
+    public function destroy(User $user): RedirectResponse
     {
         $user->delete();
 
@@ -140,22 +136,22 @@ class UsersController extends Controller implements HasMiddleware
         return redirect()->route('admin.users.index');
     }
 
-    public function activate(User $user)
+    public function activate(User $user): RedirectResponse
     {
         $user->activate();
 
-        $user->notify(new AccountStatusUpdatedNotification("Active"));
+        $user->notify(new AccountStatusUpdatedNotification('Active'));
 
         session()->flash('success', 'User activated successfully');
 
         return redirect()->route('admin.users.show', $user);
     }
 
-    public function ban(User $user)
+    public function ban(User $user): RedirectResponse
     {
         $user->ban();
 
-        $user->notify(new AccountStatusUpdatedNotification("Banned"));
+        $user->notify(new AccountStatusUpdatedNotification('Banned'));
 
         session()->flash('success', 'User banned successfully');
 

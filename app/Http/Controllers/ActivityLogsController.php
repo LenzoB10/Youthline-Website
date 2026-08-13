@@ -2,30 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Inertia\Inertia;
 use App\Traits\HasDataTable;
-use Illuminate\Routing\Controllers\HasMiddleware;
-use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Attributes\Controllers\Middleware;
+use Inertia\Inertia;
+use Inertia\Response;
 use Spatie\Activitylog\Models\Activity;
 
-class ActivityLogsController extends Controller implements HasMiddleware
+#[Middleware('permission:list audit logs', only: ['index'])]
+class ActivityLogsController extends Controller
 {
     use HasDataTable;
 
-    public static function middleware(): array
-    {
-        return [
-            new Middleware('permission:list audit logs', only: ['index']),
-        ];
-    }
-
-    public function index(Request $request)
+    public function index(Request $request): Response
     {
         $query = Activity::with('causer')
             ->select([
                 'activity_log.*',
-                'users.name as causer_name'
+                'users.name as causer_name',
             ])
             ->leftJoin('users', 'activity_log.causer_id', '=', 'users.id');
 

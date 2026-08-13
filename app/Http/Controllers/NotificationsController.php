@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class NotificationsController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): Response
     {
         $user = $request->user();
         $notifications = $user->notifications()->latest()->paginate(20);
@@ -26,7 +28,7 @@ class NotificationsController extends Controller
         ]);
     }
 
-    public function markAsRead(Request $request, $id)
+    public function markAsRead(Request $request, string $id): RedirectResponse
     {
         $user = $request->user();
         $notification = $user->notifications()->findOrFail($id);
@@ -35,7 +37,7 @@ class NotificationsController extends Controller
         return back()->with('success', 'Notification marked as read.');
     }
 
-    public function markManyAsRead(Request $request)
+    public function markManyAsRead(Request $request): RedirectResponse
     {
         $user = $request->user();
         $ids = $request->input('ids', []);
@@ -44,7 +46,7 @@ class NotificationsController extends Controller
         return back()->with('success', 'Selected notifications marked as read.');
     }
 
-    public function destroy(Request $request, $id)
+    public function destroy(Request $request, string $id): RedirectResponse
     {
         $user = $request->user();
         $notification = $user->notifications()->findOrFail($id);
@@ -53,7 +55,7 @@ class NotificationsController extends Controller
         return back()->with('success', 'Notification deleted successfully.');
     }
 
-    public function destroyAll(Request $request)
+    public function destroyAll(Request $request): RedirectResponse
     {
         $user = $request->user();
         $user->notifications()->delete();
