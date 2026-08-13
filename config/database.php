@@ -57,6 +57,10 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
+            'dump' => [
+                // Directory containing the mysqldump binary. Leave unset to use PATH.
+                'dump_binary_path' => env('DB_DUMP_BINARY_PATH', ''),
+            ],
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 Pdo\Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],

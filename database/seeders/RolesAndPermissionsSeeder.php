@@ -43,6 +43,13 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::updateOrCreate(['name' => 'see user audit logs']);
         Permission::updateOrCreate(['name' => 'see audit logs']); // For department logs
 
+        // Database Backup Permissions
+        Permission::updateOrCreate(['name' => 'list backups']);
+        Permission::updateOrCreate(['name' => 'create backup']);
+        Permission::updateOrCreate(['name' => 'download backup']);
+        Permission::updateOrCreate(['name' => 'delete backup']);
+        Permission::updateOrCreate(['name' => 'update backup settings']);
+
         // Assign all permissions to Admin
         $admin->givePermissionTo(Permission::all());
 

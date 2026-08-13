@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ActivityLogsController;
+use App\Http\Controllers\BackupsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\UserRolesAndPermissionsController;
@@ -41,6 +42,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::resource('roles', RolesController::class);
         Route::get('/activity-logs', [ActivityLogsController::class, 'index'])->name('activity-logs.index');
+
+        Route::get('/backups', [BackupsController::class, 'index'])->name('backups.index');
+        Route::post('/backups', [BackupsController::class, 'store'])->name('backups.store');
+        Route::put('/backups/settings', [BackupsController::class, 'updateSettings'])->name('backups.update-settings');
+        Route::get('/backups/{filename}/download', [BackupsController::class, 'download'])->name('backups.download');
+        Route::delete('/backups/{filename}', [BackupsController::class, 'destroy'])->name('backups.destroy');
     });
 });
 

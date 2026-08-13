@@ -86,6 +86,7 @@ import {
     Shield,
     Activity,
     BellIcon,
+    DatabaseBackup,
 } from "lucide-vue-next";
 
 import { useSidebarStore } from "@/Stores/sidebar.js";
@@ -151,6 +152,7 @@ const menuItems = ref([
             currentUrl.startsWith("/users") ||
             currentUrl.startsWith("/roles") ||
             currentUrl.startsWith("/activity-logs") ||
+            currentUrl.startsWith("/backups") ||
             currentUrl.startsWith("/system-settings"),
         isExpanded: false,
         children: [
@@ -174,6 +176,13 @@ const menuItems = ref([
                 routeLink: 'admin.activity-logs.index',
                 isCurrent: currentUrl.startsWith("/activity-logs"),
                 permission: "list audit logs",
+            },
+            {
+                name: "Backups",
+                icon: DatabaseBackup,
+                routeLink: 'admin.backups.index',
+                isCurrent: currentUrl.startsWith("/backups"),
+                permission: "list backups",
             },
         ],
     },
