@@ -8,16 +8,16 @@ The Laravel Boost guidelines are specifically curated by Laravel maintainers for
 ## Foundational Context
 This application is a Laravel application and its main Laravel ecosystems package & versions are below. You are an expert with them all. Ensure you abide by these specific packages & versions.
 
-- php - 8.2.28
-- inertiajs/inertia-laravel (INERTIA) - v2
-- laravel/framework (LARAVEL) - v12
-- laravel/prompts (PROMPTS) - v0
-- tightenco/ziggy (ZIGGY) - v2
-- laravel/pint (PINT) - v1
-- pestphp/pest (PEST) - v3
-- @inertiajs/vue3 (INERTIA) - v2
-- tailwindcss (TAILWINDCSS) - v3
-- vue (VUE) - v3
+- php - 8.5.9
+- inertiajs/inertia-laravel (INERTIA) - v3.3.1
+- laravel/framework (LARAVEL) - v13.25.0
+- laravel/prompts (PROMPTS) - v0.3.22
+- tightenco/ziggy (ZIGGY) - v2.6.3
+- laravel/pint (PINT) - v1.30.5
+- pestphp/pest (PEST) - v5.1.1
+- @inertiajs/vue3 (INERTIA) - v3.6.1
+- tailwindcss (TAILWINDCSS) - v4.3.3
+- vue (VUE) - v3.5.41
 
 
 ## Conventions
@@ -111,6 +111,54 @@ protected function isAccessible(User $user, ?string $path = null): bool
 - Typically, keys in an Enum should be TitleCase. For example: `FavoritePerson`, `BestLake`, `Monthly`.
 
 
+=== code-quality rules ===
+
+## Clean Code & Architecture
+
+Apply these principles on every change. They take priority over speed of implementation.
+
+### DRY (Don't Repeat Yourself)
+- Extract repeated logic into reusable services, classes, traits, helpers, or shared components. Never copy-paste the same logic into multiple files.
+- If identical logic appears in two or more places, extract it once and reuse it.
+
+### Single Responsibility Principle
+- Every class, method, and component should have one clear, well-named responsibility.
+- Controllers must be thin: handle only HTTP concerns (Form Request validation, authorization, response). Move business logic into dedicated service classes.
+- Business logic belongs in service classes under `App\Services` (or a domain-oriented subfolder matching existing conventions, e.g. `app/Backup/Strategies`, `app/Traits`). Follow the app's existing grouping patterns rather than inventing new base folders.
+- Models should stay focused on relationships, scopes, accessors, casts, and query scopes - not complex business logic.
+
+### Validation & Form Requests
+- Always put validation in its own Form Request class under `app/Http/Requests` (e.g. `UpdateBackupSettingsRequest`). Never validate inline in a controller.
+- The only exception is single-field validation (one field, one simple rule) which may be validated inline in the controller.
+- Form Requests should also house authorization (`authorize()`), custom error messages, and `prepareForValidation()` / `after()` hooks when needed.
+- Mirror sibling Form Requests to check whether the app uses array or string based rule conventions.
+
+### File Size Limits
+- Keep every file under 300 lines of code. When a file grows beyond this, break it up into focused classes (services, DTOs, enums, traits, single-purpose actions).
+- Controllers must never exceed 1000 lines. Break logic into service classes well before approaching that limit - most controllers should stay a few hundred lines at most.
+- Methods should be short, focused, and do exactly one thing (ideally under ~30 lines). If a method is doing more than one thing, split it into smaller named methods.
+- Refactor oversized classes into single-purpose classes with descriptive names (e.g. `BackupService`, `RetentionStrategy`).
+
+### Clean & Professional Code
+- Use descriptive, intention-revealing names for classes, methods, and variables (e.g. `isRegisteredForDiscounts`, not `discount()`).
+- Favor early returns and guard clauses over deeply nested conditionals.
+- Avoid god objects, long parameter lists, and methods with many responsibilities.
+- Do not leave commented-out code, dead code, or debugging leftovers. Delete unused imports.
+- Prefer small, composable, stateless service methods over large procedural blocks.
+- Mirror sibling files for structure, naming, and style before creating something new.
+- Keep tests green after every refactor - run the affected tests when extracting code.
+
+### Frontend (VILT: Vue / Inertia / Tailwind)
+All the principles above apply to the Vue side too - this is a VILT stack, so never treat frontend code as an afterthought.
+
+- **DRY in Vue**: Extract repeated markup, styles, and logic into reusable components and composables. Check `resources/js/Components/` (Common, FormElements, Buttons) before writing new UI.
+- **Single responsibility in Vue**: One component = one job. Split large pages into focused child components (e.g. a settings card, a table, a stats row) rather than one monolithic `.vue` file.
+- **Reusable logic**: Move non-UI logic into composables (`use*` functions), Pinia stores (`resources/js/Stores`), and pure helper functions (`resources/js/Helpers`) instead of duplicating it inside components.
+- **File size limits**: Keep every `.vue` / `.js` file under 300 lines. Break oversized components into child components, composables, or extracted templates.
+- **Forms on the client**: Use `useForm` from `@inertiajs/vue3` for all Inertia forms - never plain HTML form posts. Keep form state, submission, and error handling in one place.
+- **Clean code in Vue**: Descriptive names, no inline styles where a Tailwind class or theme token exists, no dead/commented code, no unused imports, single root element per component, and use `gap` utilities for spacing (not margins).
+
+
 === inertia-laravel/core rules ===
 
 ## Inertia Core
@@ -128,21 +176,26 @@ Route::get('/users', function () {
 </code-snippet>
 
 
-=== inertia-laravel/v2 rules ===
+=== inertia-laravel/v3 rules ===
 
-## Inertia v2
+## Inertia v3
 
-- Make use of all Inertia features from v1 & v2. Check the documentation before making any changes to ensure we are taking the correct approach.
+- Make use of all Inertia features from v1, v2 & v3. Check the documentation before making any changes to ensure we are taking the correct approach.
 
-### Inertia v2 New Features
+### Inertia v3 New Features
+- Type-safe forms and errors using the `useForm` helper and the `Form` component
 - Polling
 - Prefetching
-- Deferred props
+- Deferred props (defer props and fetch them in a follow-up request with the `Deferred` component)
 - Infinite scrolling using merging props and `WhenVisible`
-- Lazy loading data on scroll
+- Lazy loading data on scroll (`WhenVisible` with the Intersection Observer)
+- Layout props helpers
+- Nested prop types (`Inertia::defer()`, `Inertia::merge()`, `Inertia::optional()` inside closures and nested arrays)
 
 ### Deferred Props & Empty States
 - When using deferred props on the frontend, you should add a nice empty state with pulsing / animated skeleton.
+- Use the `reloading` slot prop on `Deferred` / `WhenVisible` to show a loading indicator during partial reloads while keeping existing content visible.
+- Deferred prop exceptions can be rescued with `rescue: true` on the server and a `rescue` slot on the client.
 
 
 === laravel/core rules ===
@@ -191,26 +244,36 @@ Route::get('/users', function () {
 - If you receive an "Illuminate\Foundation\ViteException: Unable to locate file in Vite manifest" error, you can run `npm run build` or ask the user to run `npm run dev` or `composer run dev`.
 
 
-=== laravel/v12 rules ===
+=== laravel/v13 rules ===
 
-## Laravel 12
+## Laravel 13
 
 - Use the `search-docs` tool to get version specific documentation.
 - Since Laravel 11, Laravel has a new streamlined file structure which this project uses.
 
-### Laravel 12 Structure
+### Laravel 13 Structure
 - No middleware files in `app/Http/Middleware/`.
 - `bootstrap/app.php` is the file to register middleware, exceptions, and routing files.
 - `bootstrap/providers.php` contains application specific service providers.
 - **No app\Console\Kernel.php** - use `bootstrap/app.php` or `routes/console.php` for console configuration.
 - **Commands auto-register** - files in `app/Console/Commands/` are automatically available and do not require manual registration.
 
+### Laravel 13 Conventions
+- Prefer first-party PHP attributes over property-based configuration. Use `#[Middleware(...)]` and `#[Authorize(...)]` on controllers instead of route-level middleware where possible, and queue attributes like `#[Tries]`, `#[Timeout]`, `#[Backoff]`, `#[FailOnTimeout]` on jobs.
+- CSRF protection is provided by the `PreventRequestForgery` middleware (formerly `VerifyCsrfToken`) which also performs origin-aware verification via `Sec-Fetch-Site`.
+- Use `php artisan dev` to run all development processes (server, queue worker, log tailing, Vite) together instead of a `composer run dev` script.
+- Use the `Queue::route(...)` API to define default queue / connection routing for jobs in a central place.
+- Use `Bus::bulk(...)` when queueing many jobs at once; it performs a single bulk insert per queue / connection.
+- Use `Cache::touch(...)` to extend an existing cache item's TTL instead of a get + put round trip.
+- Laravel 13 ships first-party AI SDK primitives and JSON:API resources - reach for these before custom solutions if the feature is AI or API serialization related.
+- Laravel 13 requires a minimum PHP version of 8.3.
+
 ### Database
 - When modifying a column, the migration must include all of the attributes that were previously defined on the column. Otherwise, they will be dropped and lost.
 - Laravel 11 allows limiting eagerly loaded records natively, without external packages: `$query->latest()->limit(10);`.
 
 ### Models
-- Casts can and likely should be set in a `casts()` method on a model rather than the `$casts` property. Follow existing conventions from other models.
+- Casts can and likely should be set in a `casts()` method on a model rather than the `$casts` property. Follow existing conventions from other models (e.g. `User` uses `casts()`).
 
 
 === pint/core rules ===
@@ -333,7 +396,7 @@ it('has emails', function (string $email) {
 - Offer to extract repeated patterns into components that match the project's conventions (i.e. Blade, JSX, Vue, etc..)
 - Think through class placement, order, priority, and defaults - remove redundant classes, add classes to parent or child carefully to limit repetition, group elements logically
 - You can use the `search-docs` tool to get exact examples from the official documentation when needed.
-- please always use the colors from tailwind.config.js
+- please always use the colors from the `@theme` block in `resources/css/app.css`
 
 ### Spacing
 - When listing items, use gap utilities for spacing, don't use margins.
@@ -351,11 +414,15 @@ it('has emails', function (string $email) {
 - If existing pages and components support dark mode, new pages and components must support dark mode in a similar way, typically using `dark:`.
 
 
-=== tailwindcss/v3 rules ===
+=== tailwindcss/v4 rules ===
 
-## Tailwind 3
+## Tailwind 4
 
-- Always use Tailwind CSS v3 - verify you're using only classes supported by this version.
+- Tailwind v4 uses CSS-first configuration. There is no `tailwind.config.js` in this project - theme values (colors, fonts, breakpoints, etc.) are defined with `@theme` in `resources/css/app.css`.
+- Custom colors map to utilities directly from `--color-*` variables (e.g. `--color-mustGreen` => `text-mustGreen`, `bg-mustGreen`). Prefer these over hard-coded hex values.
+- Use opacity modifiers (`bg-mustGreen/20`) instead of opacity utilities.
+- Reference theme values as CSS variables (`var(--color-accent)`) instead of the `theme()` function where possible.
+- All v4 utilities are supported; verify any utility against v4 docs before using it.
 
 
 === tests rules ===
