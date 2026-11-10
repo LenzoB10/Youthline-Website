@@ -14,12 +14,15 @@ class BackupSetting extends Model
         'monthly_backup_retention_months',
     ];
 
-    protected $casts = [
-        'backup_enabled' => 'boolean',
-        'backup_retention_days' => 'integer',
-        'monthly_backup_enabled' => 'boolean',
-        'monthly_backup_retention_months' => 'integer',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'backup_enabled' => 'boolean',
+            'backup_retention_days' => 'integer',
+            'monthly_backup_enabled' => 'boolean',
+            'monthly_backup_retention_months' => 'integer',
+        ];
+    }
 
     public static function defaults(): array
     {

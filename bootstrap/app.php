@@ -1,11 +1,16 @@
 <?php
 
+use App\Http\Middleware\HandleInertiaRequests;
+use App\Services\ErrorPageService;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
+use Spatie\Permission\Middleware\PermissionMiddleware;
+use Spatie\Permission\Middleware\RoleMiddleware;
+use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 use Symfony\Component\HttpFoundation\Response;
-use Inertia\Inertia;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -15,23 +20,23 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->web(append: [
-            \App\Http\Middleware\HandleInertiaRequests::class,
-            \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
+            HandleInertiaRequests::class,
+            AddLinkHeadersForPreloadedAssets::class,
         ]);
 
-        //roles and permission spatie middleware
+        // roles and permission spatie middleware
         $middleware->alias([
-            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
-            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
-            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+            'role' => RoleMiddleware::class,
+            'permission' => PermissionMiddleware::class,
+            'role_or_permission' => RoleOrPermissionMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->respond(function (Response $response, Throwable $exception, Request $request) {
-            if (in_array($response->getStatusCode(), [500, 503, 404, 403])) {
-                return Inertia::render('Errors/Index', ['status' => $response->getStatusCode()])
-                    ->toResponse($request)
-                    ->setStatusCode($response->getStatusCode());
+            $errorPages = app(ErrorPageService::class);
+
+            if ($errorPages->handles($response->getStatusCode())) {
+                return $errorPages->render($response->getStatusCode(), $request);
             } elseif ($response->getStatusCode() === 419) {
                 return back()->with([
                     'message' => 'The page expired, please try again.',

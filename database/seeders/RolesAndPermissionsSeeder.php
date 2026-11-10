@@ -15,7 +15,7 @@ class RolesAndPermissionsSeeder extends Seeder
     public function run(): void
     {
         $admin = Role::updateOrCreate(['name' => 'Admin']);
-        
+
         // User Management Permissions
         Permission::updateOrCreate(['name' => 'add user']);
         Permission::updateOrCreate(['name' => 'see user details']);
@@ -36,6 +36,9 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // System Permissions
         Permission::updateOrCreate(['name' => 'update settings']);
+
+        // Public website content management
+        Permission::updateOrCreate(['name' => 'manage website content']);
 
         // Audit Log Permissions
         Permission::updateOrCreate(['name' => 'list audit logs']);

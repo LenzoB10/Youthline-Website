@@ -2,11 +2,14 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\SiteSettingsService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
 {
+    public function __construct(protected SiteSettingsService $siteSettings) {}
+
     /**
      * The root template that is loaded on the first page visit.
      *
@@ -49,19 +52,20 @@ class HandleInertiaRequests extends Middleware
 
         return [
             ...parent::share($request),
+            'site' => fn () => $this->siteSettings->data(),
             'auth' => [
                 'user' => $request->user(),
                 'permissions' => $request->user()?->getAllCachedPermissions() ?? [],
                 'notifications' => $notifications ?? [],
             ],
-            'flash' => function() use($request){
+            'flash' => function () use ($request) {
                 return [
                     'error' => $request->session()->get('error'),
                     'success' => $request->session()->get('success'),
                     'warning' => $request->session()->get('warning'),
                     'info' => $request->session()->get('info'),
                 ];
-            }
+            },
         ];
     }
 }

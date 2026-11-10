@@ -37,9 +37,8 @@ describe('BackupsController', function () {
             $response = $this->get('/backups');
 
             $response->assertOk();
-            $response->assertInertia(fn (Assert $page) =>
-                $page->component('Backups/Index')
-                    ->has('backups')
+            $response->assertInertia(fn (Assert $page) => $page->component('Backups/Index')
+                ->has('backups')
             );
         });
 
@@ -47,44 +46,41 @@ describe('BackupsController', function () {
             $response = $this->get('/backups');
 
             $response->assertOk();
-            $response->assertInertia(fn (Assert $page) =>
-                $page->component('Backups/Index')
-                    ->has('settings')
-                    ->where('settings.backup_enabled', true)
-                    ->where('settings.backup_retention_days', 30)
-                    ->where('settings.backup_time', '01:00')
-                    ->where('settings.monthly_backup_enabled', true)
-                    ->where('settings.monthly_backup_retention_months', 12)
+            $response->assertInertia(fn (Assert $page) => $page->component('Backups/Index')
+                ->has('settings')
+                ->where('settings.backup_enabled', true)
+                ->where('settings.backup_retention_days', 30)
+                ->where('settings.backup_time', '01:00')
+                ->where('settings.monthly_backup_enabled', true)
+                ->where('settings.monthly_backup_retention_months', 12)
             );
         });
 
         it('lists existing backup files', function () {
-            Storage::disk('local')->put('Laravel/2026-08-13-10-00-00.zip', 'fake zip content');
+            Storage::disk('local')->put(config('backup.backup.name').'/2026-08-13-10-00-00.zip', 'fake zip content');
 
             $response = $this->get('/backups');
 
             $response->assertOk();
-            $response->assertInertia(fn (Assert $page) =>
-                $page->component('Backups/Index')
-                    ->has('backups.data', 1)
-                    ->where('backups.data.0.filename', '2026-08-13-10-00-00.zip')
-                    ->where('backups.data.0.type', 'daily')
-                    ->where('backups.data.0.created_at', '2026-08-13 10:00:00')
-                    ->where('backups.total', 1)
+            $response->assertInertia(fn (Assert $page) => $page->component('Backups/Index')
+                ->has('backups.data', 1)
+                ->where('backups.data.0.filename', '2026-08-13-10-00-00.zip')
+                ->where('backups.data.0.type', 'daily')
+                ->where('backups.data.0.created_at', '2026-08-13 10:00:00')
+                ->where('backups.total', 1)
             );
         });
 
         it('tags monthly backups with the monthly type', function () {
-            Storage::disk('local')->put('Laravel/2026-08-02-10-00-00.zip', 'daily');
-            Storage::disk('local')->put('Laravel/monthly/2026-08-01-10-00-00.zip', 'monthly');
+            Storage::disk('local')->put(config('backup.backup.name').'/2026-08-02-10-00-00.zip', 'daily');
+            Storage::disk('local')->put(config('backup.backup.name').'/monthly/2026-08-01-10-00-00.zip', 'monthly');
 
             $response = $this->get('/backups');
 
             $response->assertOk();
-            $response->assertInertia(fn (Assert $page) =>
-                $page->component('Backups/Index')
-                    ->where('backups.data.0.type', 'daily')
-                    ->where('backups.data.1.type', 'monthly')
+            $response->assertInertia(fn (Assert $page) => $page->component('Backups/Index')
+                ->where('backups.data.0.type', 'daily')
+                ->where('backups.data.1.type', 'monthly')
             );
         });
 
@@ -148,7 +144,7 @@ describe('BackupsController', function () {
 
     describe('download method', function () {
         beforeEach(function () {
-            Storage::disk('local')->put('Laravel/2026-08-13-10-00-00.zip', 'fake zip content');
+            Storage::disk('local')->put(config('backup.backup.name').'/2026-08-13-10-00-00.zip', 'fake zip content');
         });
 
         it('can download an existing backup', function () {
@@ -176,7 +172,7 @@ describe('BackupsController', function () {
 
     describe('destroy method', function () {
         beforeEach(function () {
-            Storage::disk('local')->put('Laravel/2026-08-13-10-00-00.zip', 'fake zip content');
+            Storage::disk('local')->put(config('backup.backup.name').'/2026-08-13-10-00-00.zip', 'fake zip content');
         });
 
         it('can delete an existing backup', function () {
@@ -185,7 +181,7 @@ describe('BackupsController', function () {
             $response->assertRedirect(route('admin.backups.index'));
             $response->assertSessionHas('success', 'Backup deleted successfully.');
 
-            Storage::disk('local')->assertMissing('Laravel/2026-08-13-10-00-00.zip');
+            Storage::disk('local')->assertMissing(config('backup.backup.name').'/2026-08-13-10-00-00.zip');
         });
 
         it('redirects when backup does not exist', function () {

@@ -15,6 +15,16 @@
     --color-mustBlue: #10274a;
     --color-mustGreen: #55b166;
 
+    /* Youthline public-website brand palette (from the YL logo: green + gold) */
+    --color-yl-green: #1c7d3c;
+    --color-yl-green-dark: #155f2d;
+    --color-yl-green-deep: #0c4a22;
+    --color-yl-forest: #072e15;
+    --color-yl-gold: #f3b807;
+    --color-yl-gold-soft: #f6cb4b;
+    --color-yl-cream: #f6f7f1;
+    --color-yl-ink: #243039;
+
     --color-background: #f9fafb;
     --color-background-soft: #f1f1f1;
     --color-background-card: #ffffff;
@@ -98,6 +108,42 @@
 
 .action-icon {
     @apply text-mustBlue transition duration-300 hover:text-mustBlue/80 dark:text-mustText-muted;
+}
+
+/* Youthline public website */
+.yl-container {
+    @apply mx-auto w-full max-w-[2200px] px-4 sm:px-8 lg:px-16;
+}
+.yl-btn,
+.yl-btn-primary,
+.yl-btn-accent,
+.yl-btn-ghost,
+.yl-btn-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2;
+}
+.yl-btn-primary {
+    @apply bg-yl-green text-white hover:bg-yl-green-dark focus:ring-yl-green;
+}
+.yl-btn-accent {
+    @apply bg-yl-gold text-yl-forest hover:brightness-95 focus:ring-yl-gold;
+}
+.yl-btn-ghost {
+    @apply border border-white/70 bg-transparent text-white hover:bg-white/10 focus:ring-white;
+}
+.yl-btn-outline {
+    @apply border border-yl-green bg-transparent text-yl-green hover:bg-yl-green/10 focus:ring-yl-green;
+}
+.yl-eyebrow {
+    @apply text-sm font-semibold uppercase tracking-wider text-yl-green;
+}
+.yl-h2 {
+    @apply text-3xl font-bold text-yl-green-deep sm:text-4xl;
+}
+.yl-nav-link {
+    @apply rounded-md px-3 py-2 text-sm font-medium text-yl-green-deep/80 transition hover:text-yl-green;
+}
+.yl-nav-link-active {
+    @apply text-yl-green;
 }
 
 /* End custom styles */

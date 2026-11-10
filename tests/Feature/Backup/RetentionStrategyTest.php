@@ -16,8 +16,8 @@ it('deletes backups older than the configured retention period', function () {
     $oldName = Carbon::now()->subDays(40)->format('Y-m-d-H-i-s').'.zip';
     $recentName = Carbon::now()->subDays(10)->format('Y-m-d-H-i-s').'.zip';
 
-    Storage::disk('local')->put('Laravel/'.$oldName, 'old');
-    Storage::disk('local')->put('Laravel/'.$recentName, 'recent');
+    Storage::disk('local')->put(config('backup.backup.name').'/'.$oldName, 'old');
+    Storage::disk('local')->put(config('backup.backup.name').'/'.$recentName, 'recent');
 
     BackupSetting::current()->update(['backup_retention_days' => 30]);
 
@@ -26,8 +26,8 @@ it('deletes backups older than the configured retention period', function () {
 
     $strategy->deleteOldBackups($destination->backups());
 
-    Storage::disk('local')->assertMissing('Laravel/'.$oldName);
-    Storage::disk('local')->assertExists('Laravel/'.$recentName);
+    Storage::disk('local')->assertMissing(config('backup.backup.name').'/'.$oldName);
+    Storage::disk('local')->assertExists(config('backup.backup.name').'/'.$recentName);
 });
 
 it('keeps all backups when none are older than the retention period', function () {
@@ -35,7 +35,7 @@ it('keeps all backups when none are older than the retention period', function (
 
     $recentName = Carbon::now()->subDays(2)->format('Y-m-d-H-i-s').'.zip';
 
-    Storage::disk('local')->put('Laravel/'.$recentName, 'recent');
+    Storage::disk('local')->put(config('backup.backup.name').'/'.$recentName, 'recent');
 
     BackupSetting::current()->update(['backup_retention_days' => 30]);
 
@@ -44,7 +44,7 @@ it('keeps all backups when none are older than the retention period', function (
 
     $strategy->deleteOldBackups($destination->backups());
 
-    Storage::disk('local')->assertExists('Laravel/'.$recentName);
+    Storage::disk('local')->assertExists(config('backup.backup.name').'/'.$recentName);
 });
 
 it('deletes monthly backups older than the configured retention months', function () {
@@ -53,8 +53,8 @@ it('deletes monthly backups older than the configured retention months', functio
     $oldName = Carbon::now()->startOfMonth()->subMonths(13)->format('Y-m-d-H-i-s').'.zip';
     $recentName = Carbon::now()->startOfMonth()->subMonths(2)->format('Y-m-d-H-i-s').'.zip';
 
-    Storage::disk('local')->put('Laravel/monthly/'.$oldName, 'old monthly');
-    Storage::disk('local')->put('Laravel/monthly/'.$recentName, 'recent monthly');
+    Storage::disk('local')->put(config('backup.backup.name').'/monthly/'.$oldName, 'old monthly');
+    Storage::disk('local')->put(config('backup.backup.name').'/monthly/'.$recentName, 'recent monthly');
 
     BackupSetting::current()->update(['monthly_backup_retention_months' => 12]);
 
@@ -63,8 +63,8 @@ it('deletes monthly backups older than the configured retention months', functio
 
     $strategy->deleteOldBackups($destination->backups());
 
-    Storage::disk('local')->assertMissing('Laravel/monthly/'.$oldName);
-    Storage::disk('local')->assertExists('Laravel/monthly/'.$recentName);
+    Storage::disk('local')->assertMissing(config('backup.backup.name').'/monthly/'.$oldName);
+    Storage::disk('local')->assertExists(config('backup.backup.name').'/monthly/'.$recentName);
 });
 
 it('applies day retention to daily backups and month retention to monthly backups', function () {
@@ -74,9 +74,9 @@ it('applies day retention to daily backups and month retention to monthly backup
     $oldMonthlyName = Carbon::now()->startOfMonth()->subMonths(13)->format('Y-m-d-H-i-s').'.zip';
     $recentMonthlyName = Carbon::now()->startOfMonth()->subMonths(2)->format('Y-m-d-H-i-s').'.zip';
 
-    Storage::disk('local')->put('Laravel/'.$oldDailyName, 'old daily');
-    Storage::disk('local')->put('Laravel/monthly/'.$oldMonthlyName, 'old monthly');
-    Storage::disk('local')->put('Laravel/monthly/'.$recentMonthlyName, 'recent monthly');
+    Storage::disk('local')->put(config('backup.backup.name').'/'.$oldDailyName, 'old daily');
+    Storage::disk('local')->put(config('backup.backup.name').'/monthly/'.$oldMonthlyName, 'old monthly');
+    Storage::disk('local')->put(config('backup.backup.name').'/monthly/'.$recentMonthlyName, 'recent monthly');
 
     BackupSetting::current()->update([
         'backup_retention_days' => 30,
@@ -88,7 +88,7 @@ it('applies day retention to daily backups and month retention to monthly backup
 
     $strategy->deleteOldBackups($destination->backups());
 
-    Storage::disk('local')->assertMissing('Laravel/'.$oldDailyName);
-    Storage::disk('local')->assertMissing('Laravel/monthly/'.$oldMonthlyName);
-    Storage::disk('local')->assertExists('Laravel/monthly/'.$recentMonthlyName);
+    Storage::disk('local')->assertMissing(config('backup.backup.name').'/'.$oldDailyName);
+    Storage::disk('local')->assertMissing(config('backup.backup.name').'/monthly/'.$oldMonthlyName);
+    Storage::disk('local')->assertExists(config('backup.backup.name').'/monthly/'.$recentMonthlyName);
 });
