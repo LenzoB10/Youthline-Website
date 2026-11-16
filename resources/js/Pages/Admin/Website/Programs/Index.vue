@@ -2,7 +2,7 @@
 import ConfirmationModal from '@/Components/Common/Modal/ConfirmationModal.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ArrowLeft, Plus, SquarePen, Trash2 } from 'lucide-vue-next';
+import { ArrowLeft, ExternalLink, ImageOff, Plus, SquarePen, Trash2 } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 defineProps({
@@ -58,7 +58,14 @@ const destroy = () => {
                     >
                         <td class="px-3 py-2">
                             <div class="flex items-center gap-3">
-                                <img v-if="program.image" :src="program.image" :alt="program.name" class="h-9 w-9 rounded object-cover" />
+                                <img v-if="program.image" :src="program.image" :alt="program.name" class="h-9 w-14 rounded object-cover" />
+                                <span
+                                    v-else
+                                    class="flex h-9 w-14 items-center justify-center rounded bg-gray-100 text-gray-400 dark:bg-gray-700"
+                                    title="No photo yet: the website shows a stand-in photo"
+                                >
+                                    <ImageOff class="h-4 w-4" />
+                                </span>
                                 <span class="font-medium text-mustBlue dark:text-text-inverted">{{ program.name }}</span>
                             </div>
                         </td>
@@ -66,6 +73,15 @@ const destroy = () => {
                         <td class="px-3 py-2 text-text-muted">{{ program.display_order }}</td>
                         <td class="px-3 py-2">
                             <div class="flex items-center justify-end gap-3">
+                                <a
+                                    :href="route('programs.show', program.slug)"
+                                    target="_blank"
+                                    rel="noopener"
+                                    class="action-icon"
+                                    title="View on website"
+                                >
+                                    <ExternalLink class="h-4 w-4" />
+                                </a>
                                 <Link :href="route('admin.website.programs.edit', program.id)" class="action-icon">
                                     <SquarePen class="h-4 w-4" />
                                 </Link>

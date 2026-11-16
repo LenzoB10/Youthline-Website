@@ -35,16 +35,8 @@ const themeStore = useThemeStore();
                 <div
                     class="mb-3 flex flex-col items-center justify-center text-2xl font-bold text-mustBlue dark:text-text-inverted md:text-3xl lg:text-4xl"
                 >
-                    <img
-                        :src="
-                            themeStore.darkMode
-                                ? '/imgs/logo/must-logo-white.png'
-                                : '/imgs/logo/must-logo-black.png'
-                        "
-                        alt=""
-                        class="w-16"
-                    />
-                    <h1 class="mt-2">MUST</h1>
+                    <img src="/imgs/youthline-logo-sm.png" alt="" width="240" height="160" class="h-20 w-auto object-contain" />
+                    <h1 class="mt-2">Youthline</h1>
                 </div>
                 <slot />
             </div>

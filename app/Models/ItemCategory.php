@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\LogsActivityTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ItemCategory extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivityTrait;
 
     protected $guarded = [];
 
@@ -22,5 +23,13 @@ class ItemCategory extends Model
     public function distributions(): HasMany
     {
         return $this->hasMany(Distribution::class);
+    }
+
+    /**
+     * Distributions cascade on delete, so a used category must never be removed.
+     */
+    public function isInUse(): bool
+    {
+        return $this->distributions()->exists();
     }
 }

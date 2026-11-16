@@ -10,9 +10,10 @@ import Vue3Toastify from 'vue3-toastify';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import can from './Directives/can';
 import clickOutside from './Directives/clickOutside';
+import reveal from './Directives/reveal';
 import { useThemeStore } from './Stores/theme';
 
-const appName = import.meta.env.VITE_APP_NAME || 'MUST Admissions';
+const appName = import.meta.env.VITE_APP_NAME || 'Youthline';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
@@ -35,6 +36,7 @@ createInertiaApp({
 
         app.directive('can', can);
         app.directive('click-outside', clickOutside);
+        app.directive('reveal', reveal);
 
         app.mount(el);
 

@@ -33,3 +33,9 @@ Schedule::command('backup:clean --disable-notifications')
     ->when(fn () => BackupSetting::safeCurrent()->backup_enabled || BackupSetting::safeCurrent()->monthly_backup_enabled)
     ->withoutOverlapping()
     ->timezone(config('app.timezone'));
+
+// Reminders engine (Development Plan Phase 5): one in-app digest per person each morning.
+Schedule::command('youthline:send-reminders')
+    ->dailyAt('07:00')
+    ->withoutOverlapping()
+    ->timezone(config('app.timezone'));

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\LogsActivityTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Term extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivityTrait;
 
     protected $guarded = [];
 
@@ -18,6 +19,7 @@ class Term extends Model
         return [
             'start_date' => 'date',
             'end_date' => 'date',
+            'is_current' => 'boolean',
         ];
     }
 
@@ -34,5 +36,10 @@ class Term extends Model
     public function fees(): HasMany
     {
         return $this->hasMany(Fee::class);
+    }
+
+    public function isInUse(): bool
+    {
+        return $this->results()->exists() || $this->fees()->exists();
     }
 }

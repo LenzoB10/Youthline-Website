@@ -80,3 +80,37 @@ it('passes the latest news to the home page', function () {
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page) => $page->has('news', 1));
 });
+
+it('filters the news page by category and counts each category', function () {
+    publishedPost(['title' => 'Plain news']);
+    publishedPost(['title' => 'Big win', 'category' => 'success_story']);
+    publishedPost(['title' => 'Uniform day', 'category' => 'activity']);
+    NewsPost::create(['title' => 'Hidden draft', 'category' => 'activity', 'is_published' => false]);
+
+    get(route('news', ['category' => 'success_story']))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->has('posts', 1)
+            ->where('posts.0.title', 'Big win')
+            ->where('activeCategory', 'success_story')
+            ->where('totalPosts', 3)
+            ->where('categories.2.key', 'activity')
+            ->where('categories.2.count', 1)
+        );
+
+    // Unknown categories fall back to everything.
+    get(route('news', ['category' => 'nonsense']))
+        ->assertInertia(fn (AssertableInertia $page) => $page->has('posts', 3)->where('activeCategory', null));
+});
+
+it('leads with the newest post and gives each post a reading time', function () {
+    publishedPost(['title' => 'Older', 'published_at' => now()->subWeek()]);
+    publishedPost(['title' => 'Newest', 'body' => str_repeat('word ', 450), 'published_at' => now()]);
+
+    get(route('news'))
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->where('posts.0.title', 'Newest')
+            ->where('posts.0.reading_minutes', 3)
+            ->where('posts.1.reading_minutes', 1)
+        );
+});

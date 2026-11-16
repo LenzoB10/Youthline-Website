@@ -227,6 +227,9 @@ class YouthlineSeeder extends Seeder
             ]);
         }
 
+        // Exit reasons, approval defaults, and the current term (2025, Term 3).
+        $this->call(SettingsSeeder::class);
+
         foreach ([
             ['Uniforms', 8500], ['Exercise books', 300], ['School bags', 6000],
             ['Sanitary pads', 1500], ['Food packs', 12000], ['Shoes', 9000],
@@ -419,17 +422,14 @@ class YouthlineSeeder extends Seeder
                 }
             }
 
-            // Basic needs distributions
-            Distribution::create([
-                'student_id' => $student->id,
-                'item_category_id' => $this->itemCategories[0]->id,
-                'quantity' => 2, 'given_on' => '2025-01-10', 'recorded_by' => $this->manager->id,
-            ]);
-            Distribution::create([
-                'student_id' => $student->id,
-                'item_category_id' => $this->itemCategories[1]->id,
-                'quantity' => 6, 'given_on' => '2025-01-10', 'recorded_by' => $this->manager->id,
-            ]);
+            // Basic needs: money for groceries
+            foreach (['2025-01-10', '2025-05-12', '2025-09-08'] as $given) {
+                Distribution::create([
+                    'student_id' => $student->id,
+                    'amount' => 20000, 'quantity' => 1, 'given_on' => $given,
+                    'note' => 'Groceries', 'recorded_by' => $this->manager->id,
+                ]);
+            }
 
             // Mentorship
             $mentor = $this->mentors[$i % count($this->mentors)];

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\NewsPost;
+use App\Models\Program;
 use App\Models\SiteSetting;
 
 use function Pest\Laravel\get;
@@ -60,4 +61,12 @@ it('serves a robots.txt pointing to the sitemap', function () {
     $response->assertHeader('Content-Type', 'text/plain; charset=UTF-8');
     $response->assertSee('User-agent: *', false);
     $response->assertSee('Sitemap: '.route('sitemap'), false);
+});
+
+it('lists each program page in the sitemap', function () {
+    Program::create(['name' => 'Education', 'slug' => 'education']);
+
+    Pest\Laravel\get('/sitemap.xml')
+        ->assertOk()
+        ->assertSee(route('programs.show', 'education'), false);
 });

@@ -3,6 +3,7 @@
 namespace App\Services\Seo;
 
 use App\Models\NewsPost;
+use App\Models\Program;
 use Illuminate\Support\Carbon;
 
 class SitemapService
@@ -38,6 +39,17 @@ class SitemapService
                 'priority' => $priority,
             ];
         }
+
+        Program::query()
+            ->orderBy('display_order')
+            ->get(['slug', 'updated_at'])
+            ->each(function (Program $program) use (&$urls): void {
+                $urls[] = [
+                    'loc' => route('programs.show', $program->slug),
+                    'lastmod' => $program->updated_at?->toAtomString(),
+                    'priority' => '0.7',
+                ];
+            });
 
         NewsPost::query()
             ->where('is_published', true)

@@ -10,8 +10,14 @@ import {
     Twitter,
     X,
 } from 'lucide-vue-next';
-import { computed, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { toast } from 'vue3-toastify';
+
+const props = defineProps({
+    // Pages with a full-bleed photo hero (Home) start with a see-through
+    // navbar over the photo, which turns solid white once the visitor scrolls.
+    transparentHeader: { type: Boolean, default: false },
+});
 
 const page = usePage();
 const site = computed(() => page.props.site ?? {});
@@ -53,6 +59,20 @@ const navLinks = [
 
 const mobileOpen = ref(false);
 
+const scrolled = ref(false);
+const onScroll = () => {
+    scrolled.value = window.scrollY > 24;
+};
+onMounted(() => {
+    if (props.transparentHeader) {
+        onScroll();
+        window.addEventListener('scroll', onScroll, { passive: true });
+    }
+});
+onBeforeUnmount(() => window.removeEventListener('scroll', onScroll));
+
+const solidHeader = computed(() => !props.transparentHeader || scrolled.value || mobileOpen.value);
+
 const isCurrent = (name) => {
     try {
         return route().current(name);
@@ -67,28 +87,29 @@ const isCurrent = (name) => {
         <!-- Keyboard / screen-reader users can jump straight past the navigation -->
         <a
             href="#main-content"
-            class="sr-only z-50 rounded-full bg-yl-gold px-5 py-2 text-sm font-semibold text-yl-forest focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
+            class="sr-only z-50 bg-yl-gold px-5 py-2 text-sm font-semibold text-yl-forest focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
         >
             Skip to content
         </a>
 
         <!-- Header -->
-        <header class="sticky top-0 z-40 border-b border-gray-100 bg-white/95 backdrop-blur">
+        <header
+            class="top-0 z-40 border-b transition-colors duration-300"
+            :class="[
+                transparentHeader ? 'fixed inset-x-0' : 'sticky',
+                solidHeader ? 'border-gray-100 bg-white/95 shadow-sm backdrop-blur' : 'border-transparent bg-transparent',
+            ]"
+        >
             <div class="yl-container flex h-16 items-center justify-between gap-4">
                 <!-- Brand -->
                 <Link :href="route('home')" class="flex items-center gap-2.5" aria-label="Youthline home">
-                    <span class="flex h-11 items-center justify-center rounded-lg bg-yl-forest px-1.5">
-                        <img
-                            src="/imgs/youthline-logo-sm.png"
-                            alt=""
-                            width="240"
-                            height="160"
-                            class="h-9 w-auto object-contain"
-                        />
-                    </span>
-                    <span class="text-lg font-bold tracking-tight text-yl-green-deep">
-                        {{ site.org_name || 'Youthline' }}
-                    </span>
+                    <img
+                        src="/imgs/youthline-logo-sm.png"
+                        alt=""
+                        width="240"
+                        height="160"
+                        class="h-11 w-auto object-contain"
+                    />
                 </Link>
 
                 <!-- Desktop nav -->
@@ -97,8 +118,11 @@ const isCurrent = (name) => {
                         v-for="link in navLinks"
                         :key="link.route"
                         :href="route(link.route)"
-                        class="yl-nav-link"
-                        :class="{ 'yl-nav-link-active': isCurrent(link.route) }"
+                        :class="
+                            solidHeader
+                                ? ['yl-nav-link', { 'yl-nav-link-active': isCurrent(link.route) }]
+                                : ['yl-nav-link-light', { 'yl-nav-link-light-active': isCurrent(link.route) }]
+                        "
                         :aria-current="isCurrent(link.route) ? 'page' : undefined"
                     >
                         {{ link.label }}
@@ -114,7 +138,8 @@ const isCurrent = (name) => {
                 <!-- Mobile toggle -->
                 <button
                     type="button"
-                    class="inline-flex items-center justify-center rounded-md p-2 text-yl-green-deep lg:hidden"
+                    class="inline-flex items-center justify-center p-2 transition-colors lg:hidden"
+                    :class="solidHeader ? 'text-yl-green-deep' : 'text-white'"
                     :aria-label="mobileOpen ? 'Close menu' : 'Open menu'"
                     :aria-expanded="mobileOpen ? 'true' : 'false'"
                     aria-controls="mobile-menu"
@@ -151,7 +176,7 @@ const isCurrent = (name) => {
         </header>
 
         <!-- Page content -->
-        <main id="main-content" tabindex="-1" class="flex-1 focus:outline-none">
+        <main id="main-content" tabindex="-1" class="yl-page-fade flex-1 focus:outline-none">
             <slot />
         </main>
 
@@ -179,7 +204,7 @@ const isCurrent = (name) => {
                             :href="social.facebook"
                             target="_blank"
                             rel="noopener"
-                            class="rounded-full bg-white/10 p-2 transition hover:bg-white/20"
+                            class="yl-social yl-social-facebook bg-white/10 p-2"
                             aria-label="Facebook"
                         >
                             <Facebook class="h-4 w-4" />
@@ -189,7 +214,7 @@ const isCurrent = (name) => {
                             :href="social.instagram"
                             target="_blank"
                             rel="noopener"
-                            class="rounded-full bg-white/10 p-2 transition hover:bg-white/20"
+                            class="yl-social yl-social-instagram bg-white/10 p-2"
                             aria-label="Instagram"
                         >
                             <Instagram class="h-4 w-4" />
@@ -199,7 +224,7 @@ const isCurrent = (name) => {
                             :href="social.x"
                             target="_blank"
                             rel="noopener"
-                            class="rounded-full bg-white/10 p-2 transition hover:bg-white/20"
+                            class="yl-social yl-social-x bg-white/10 p-2"
                             aria-label="X"
                         >
                             <Twitter class="h-4 w-4" />

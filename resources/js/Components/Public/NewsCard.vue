@@ -1,45 +1,35 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
-import { ArrowRight } from 'lucide-vue-next';
-import { computed } from 'vue';
 
-const props = defineProps({
+defineProps({
     post: { type: Object, required: true },
 });
-
-const categoryLabel = {
-    news: 'News',
-    success_story: 'Success story',
-    activity: 'Activity',
-};
-
-const label = computed(() => categoryLabel[props.post.category] ?? 'News');
 </script>
 
 <template>
-    <article class="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:shadow-md">
-        <img
-            v-if="post.image"
-            :src="post.image"
-            :alt="post.title"
-            class="h-44 w-full object-cover"
-        />
-        <div v-else class="h-44 w-full bg-yl-green/10" />
-        <div class="flex flex-1 flex-col p-6">
-            <div class="flex items-center gap-3 text-xs">
-                <span class="rounded-full bg-yl-green/10 px-3 py-1 font-semibold text-yl-green">
-                    {{ label }}
-                </span>
-                <span class="text-yl-ink/50">{{ post.published_human }}</span>
+    <article class="group">
+        <Link :href="route('news.show', post.id)" class="block focus:outline-none">
+            <div class="aspect-[16/9] overflow-hidden bg-yl-green/10">
+                <img
+                    v-if="post.image"
+                    :src="post.image"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                />
+                <div v-else class="flex h-full items-center justify-center">
+                    <img src="/imgs/youthline-logo-sm.png" alt="" class="h-16 w-auto opacity-40" />
+                </div>
             </div>
-            <h3 class="mt-3 text-lg font-bold text-yl-green-deep">{{ post.title }}</h3>
-            <p class="mt-2 flex-1 text-sm text-yl-ink/70">{{ post.excerpt }}</p>
-            <Link
-                :href="route('news.show', post.id)"
-                class="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-yl-green hover:text-yl-green-dark"
+            <h3
+                class="mt-5 text-xl font-bold leading-snug text-yl-ink transition group-hover:text-yl-green group-focus-visible:text-yl-green group-focus-visible:underline"
             >
-                Read more <ArrowRight class="h-4 w-4" />
-            </Link>
-        </div>
+                {{ post.title }}
+            </h3>
+        </Link>
+        <p class="mt-2 text-sm text-yl-ink/55">
+            <time :datetime="post.published_at" :title="post.published_long">{{ post.published_relative }}</time>
+        </p>
     </article>
 </template>

@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Website;
 
 use App\Http\Controllers\Controller;
+use App\Models\Program;
 use App\Services\Seo\SeoService;
 use App\Services\Website\ImpactMetricsService;
 use App\Services\Website\PublicContentService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -31,12 +34,26 @@ class PageController extends Controller
 
     public function about(): Response
     {
-        return $this->page('Public/About', 'about', $this->content->about());
+        return $this->page('Public/About', 'about', [
+            ...$this->content->about(),
+            'impact' => $this->impact->headline(),
+        ]);
     }
 
     public function programs(): Response
     {
         return $this->page('Public/Programs', 'programs', $this->content->programsPage());
+    }
+
+    public function program(Program $program): Response
+    {
+        $content = $this->content->programPage($program);
+
+        return $this->page('Public/ProgramShow', 'programs', $content, [
+            'title' => $program->name,
+            'description' => Str::limit(strip_tags((string) ($program->summary ?: $program->description)), 160),
+            'image' => url($content['program']['image']),
+        ]);
     }
 
     public function impact(): Response
@@ -51,9 +68,9 @@ class PageController extends Controller
         return $this->page('Public/GetInvolved', 'get-involved');
     }
 
-    public function news(): Response
+    public function news(Request $request): Response
     {
-        return $this->page('Public/News', 'news', $this->content->newsPage());
+        return $this->page('Public/News', 'news', $this->content->newsPage($request->string('category')->toString() ?: null));
     }
 
     public function contact(): Response
@@ -65,11 +82,12 @@ class PageController extends Controller
      * Render a public page with its SEO payload and content props.
      *
      * @param  array<string, mixed>  $props
+     * @param  array<string, string>  $seo  Per-page SEO overrides
      */
-    protected function page(string $component, string $seoKey, array $props = []): Response
+    protected function page(string $component, string $seoKey, array $props = [], array $seo = []): Response
     {
         return Inertia::render($component, [
-            'seo' => $this->seo->forPage($seoKey),
+            'seo' => $this->seo->forPage($seoKey, $seo),
             ...$props,
         ]);
     }

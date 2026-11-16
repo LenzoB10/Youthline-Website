@@ -43,7 +43,7 @@ const helpfulLinks = [
 
     <PublicLayout>
         <section class="bg-yl-cream">
-            <div class="yl-container py-20 text-center sm:py-28">
+            <div class="yl-enter yl-container py-20 text-center sm:py-28">
                 <p class="text-7xl font-extrabold tracking-tight text-yl-green sm:text-8xl">{{ status }}</p>
                 <h1 class="mt-4 text-3xl font-bold text-yl-green-deep sm:text-4xl">{{ content.title }}</h1>
                 <p class="mx-auto mt-4 max-w-xl text-lg text-yl-ink/70">{{ content.message }}</p>

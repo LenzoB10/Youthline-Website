@@ -25,13 +25,13 @@ const paragraphs = computed(() =>
 
     <PublicLayout>
         <article class="py-16">
-            <div class="yl-container max-w-3xl">
+            <div class="yl-enter yl-container max-w-3xl">
                 <Link :href="route('news')" class="inline-flex items-center gap-1 text-sm font-semibold text-yl-green hover:text-yl-green-dark">
                     <ArrowLeft class="h-4 w-4" /> All news and stories
                 </Link>
 
                 <div class="mt-6 flex items-center gap-3 text-xs">
-                    <span class="rounded-full bg-yl-green/10 px-3 py-1 font-semibold text-yl-green">{{ label }}</span>
+                    <span class="bg-yl-green/10 px-3 py-1 font-semibold text-yl-green">{{ label }}</span>
                     <span class="text-yl-ink/50">{{ post.published_human }}</span>
                 </div>
 
@@ -41,7 +41,7 @@ const paragraphs = computed(() =>
                     v-if="post.image"
                     :src="post.image"
                     :alt="post.title"
-                    class="mt-8 w-full rounded-2xl object-cover"
+                    class="mt-8 h-64 w-full object-cover object-[center_35%] sm:h-80 lg:h-[26rem]"
                 />
 
                 <div class="mt-8">

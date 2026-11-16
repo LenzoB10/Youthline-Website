@@ -89,11 +89,11 @@ it('exposes the full impact figures to the Our Impact page', function () {
         );
 });
 
-it('passes a four-figure headline strip to the home page', function () {
-    get(route('home'))
+it('passes a four-figure headline strip to the home and about pages', function (string $route) {
+    get(route($route))
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page) => $page->has('impact', 4));
-});
+})->with(['home', 'about']);
 
 it('never exposes student names on the impact page', function () {
     Student::create(['first_name' => 'Tadala', 'last_name' => 'Confidential', 'status' => 'active']);

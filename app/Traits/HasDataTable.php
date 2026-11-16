@@ -1,8 +1,9 @@
 <?php
+
 namespace App\Traits;
 
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 trait HasDataTable
 {
@@ -17,13 +18,13 @@ trait HasDataTable
         $defaultSortDirection = 'desc'
     ) {
         // Apply search with performance considerations
-        if ($request->search && !empty($searchable)) {
+        if ($request->search && ! empty($searchable)) {
             $this->applySearch($query, $request->search, $searchable);
         }
 
         // Apply filters with indexing in mind
         foreach ($filterable as $filter => $callback) {
-            if ($request->has($filter) && !empty($request->$filter)) {
+            if ($request->has($filter) && ! empty($request->$filter)) {
                 $this->applyFilter($query, $filter, $request->$filter, $callback);
             }
         }
@@ -39,9 +40,9 @@ trait HasDataTable
         // Caching mechanism for paginated results
         if ($cacheKey) {
             $page = $request->page ?? 1;
-            $cacheKey = "datatable:{$cacheKey}:page_{$page}:" . md5(json_encode($request->all()));
+            $cacheKey = "datatable:{$cacheKey}:page_{$page}:".md5(json_encode($request->all()));
 
-            return Cache::remember($cacheKey, $cacheTtl, function() use ($query, $request) {
+            return Cache::remember($cacheKey, $cacheTtl, function () use ($query, $request) {
                 return $this->executePagination($query, $request);
             });
         }
@@ -49,18 +50,31 @@ trait HasDataTable
         return $this->executePagination($query, $request);
     }
 
+    /**
+     * Limit sorting to known columns. The DataTable lets users click any column
+     * header (including computed ones), so anything else falls back to $default.
+     *
+     * @param  array<int, string>  $allowed
+     */
+    protected function restrictSorting($request, array $allowed, string $default): void
+    {
+        if (! in_array($request->input('sort_by'), $allowed, true)) {
+            $request->merge(['sort_by' => $default]);
+        }
+    }
+
     protected function applySearch($query, $searchTerm, $searchableFields)
     {
         // Use full-text search if available
         if (config('database.default') === 'mysql' && $this->isFullTextSearchSupported()) {
-            $query->where(function($q) use ($searchTerm, $searchableFields) {
+            $query->where(function ($q) use ($searchTerm, $searchableFields) {
                 foreach ($searchableFields as $field) {
                     $q->orWhereRaw("MATCH($field) AGAINST(? IN BOOLEAN MODE)", [$searchTerm]);
                 }
             });
         } else {
             // Advanced LIKE search with wildcard on both sides for substring matching
-            $query->where(function($q) use ($searchTerm, $searchableFields) {
+            $query->where(function ($q) use ($searchTerm, $searchableFields) {
                 foreach ($searchableFields as $field) {
                     $q->orWhere($field, 'like', "%{$searchTerm}%");
                 }

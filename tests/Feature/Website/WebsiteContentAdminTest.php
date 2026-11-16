@@ -117,3 +117,29 @@ it('validates program image uploads', function () {
 
     expect(Program::count())->toBe(0);
 });
+
+it('only accepts JPG, PNG or WebP program photos', function () {
+    Storage::fake('public');
+
+    actingAs($this->editor)
+        ->post(route('admin.website.programs.store'), [
+            'name' => 'Careers',
+            'image' => UploadedFile::fake()->image('photo.gif'),
+        ])
+        ->assertSessionHasErrors('image');
+
+    actingAs($this->editor)
+        ->post(route('admin.website.programs.store'), [
+            'name' => 'Careers',
+            'image' => UploadedFile::fake()->image('photo.webp'),
+        ])
+        ->assertSessionHasNoErrors();
+});
+
+it('links each program to its public page from the admin list', function () {
+    Program::create(['name' => 'Careers', 'slug' => 'careers']);
+
+    actingAs($this->editor)
+        ->get(route('admin.website.programs.index'))
+        ->assertInertia(fn ($page) => $page->where('programs.0.slug', 'careers'));
+});

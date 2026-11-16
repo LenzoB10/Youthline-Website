@@ -16,21 +16,27 @@ const initials = computed(() =>
 </script>
 
 <template>
-    <div class="text-center">
-        <img
-            v-if="member.photo"
-            :src="member.photo"
-            :alt="member.name"
-            class="mx-auto h-28 w-28 rounded-full object-cover"
-        />
-        <span
-            v-else
-            class="mx-auto flex h-28 w-28 items-center justify-center rounded-full bg-yl-green/10 text-2xl font-bold text-yl-green"
-        >
-            {{ initials }}
-        </span>
-        <h3 class="mt-4 text-base font-bold text-yl-green-deep">{{ member.name }}</h3>
-        <p class="text-sm font-medium text-yl-green">{{ member.position }}</p>
-        <p v-if="member.bio" class="mt-2 text-sm text-yl-ink/70">{{ member.bio }}</p>
-    </div>
+    <article class="flex h-full flex-col bg-white p-7 shadow-sm transition hover:shadow-md">
+        <p v-if="member.bio" class="flex-1 leading-relaxed text-yl-ink/70">{{ member.bio }}</p>
+        <div class="flex items-center gap-4" :class="{ 'mt-6 border-t border-gray-100 pt-6': member.bio }">
+            <img
+                v-if="member.photo"
+                :src="member.photo"
+                :alt="member.name"
+                loading="lazy"
+                class="h-14 w-14 shrink-0 object-cover"
+            />
+            <span
+                v-else
+                class="flex h-14 w-14 shrink-0 items-center justify-center bg-yl-green/10 text-lg font-bold text-yl-green"
+                aria-hidden="true"
+            >
+                {{ initials }}
+            </span>
+            <div>
+                <h3 class="text-lg font-bold text-yl-green-deep">{{ member.name }}</h3>
+                <p class="text-sm text-yl-green">{{ member.position }}</p>
+            </div>
+        </div>
+    </article>
 </template>

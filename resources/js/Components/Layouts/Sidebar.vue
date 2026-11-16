@@ -16,9 +16,9 @@
                         : '-translate-x-full',
                 'md:transition-transform md:duration-300',
             ]">
-            <a href="/" class="flex flex-shrink-0 items-center gap-2 px-6 py-4 text-2xl font-bold text-text-inverted">
-                <img src="/imgs/logo/must-logo-white.png" alt="Logo" class="w-9" />
-                <span>MUST</span>
+            <a href="/" class="flex flex-shrink-0 items-center gap-2.5 px-6 py-4 text-2xl font-bold text-text-inverted">
+                <img src="/imgs/youthline-logo-sm.png" alt="" width="240" height="160" class="h-10 w-auto object-contain" />
+                <span>Youthline</span>
             </a>
             <nav class="flex-grow overflow-y-auto px-3 pb-4">
                 <ul class="space-y-2">
@@ -97,6 +97,24 @@ import {
     MessageSquare,
     Handshake,
     Mail,
+    SlidersHorizontal,
+    CalendarDays,
+    School,
+    Package,
+    DoorOpen,
+    ShieldCheck,
+    GraduationCap,
+    UserPlus,
+    ArrowUpCircle,
+    Wallet,
+    HandCoins,
+    ClipboardCheck,
+    LifeBuoy,
+    MessagesSquare,
+    Hammer,
+    Store,
+    HeartHandshake,
+    FileBarChart,
 } from "lucide-vue-next";
 
 import { useSidebarStore } from "@/Stores/sidebar.js";
@@ -131,7 +149,10 @@ const hasPermission = (permission) => {
     try {
         const page = usePage();
         const permissions = page?.props?.auth?.permissions || [];
-        return permissions.includes(permission);
+        // An array means "any of these".
+        return Array.isArray(permission)
+            ? permission.some((p) => permissions.includes(p))
+            : permissions.includes(permission);
     } catch (error) {
         console.warn("Error checking permission:", error);
         return false;
@@ -237,6 +258,161 @@ const menuItems = ref([
                 routeLink: 'admin.website.subscribers.index',
                 isCurrent: currentUrl.startsWith("/website/subscribers"),
                 permission: "manage website content",
+            },
+        ],
+    },
+    {
+        name: "Students",
+        icon: GraduationCap,
+        permission: "list students",
+        isCurrent: currentUrl.startsWith("/students"),
+        isExpanded: false,
+        children: [
+            {
+                name: "All students",
+                icon: Users,
+                routeLink: 'students.index',
+                isCurrent: currentUrl === "/students" || /^\/students\/\d+/.test(currentUrl) || currentUrl.startsWith("/students?"),
+                permission: "list students",
+            },
+            {
+                name: "Add student",
+                icon: UserPlus,
+                routeLink: 'students.create',
+                isCurrent: currentUrl.startsWith("/students/create"),
+                permission: "add student",
+            },
+            {
+                name: "Promote students",
+                icon: ArrowUpCircle,
+                routeLink: 'students.promote.index',
+                isCurrent: currentUrl.startsWith("/students/promote"),
+                permission: "change student status",
+            },
+        ],
+    },
+    {
+        name: "Support",
+        icon: LifeBuoy,
+        permission: ["manage basic needs", "manage mentorship", "manage home visits", "manage businesses"],
+        isCurrent: currentUrl.startsWith("/support"),
+        isExpanded: false,
+        children: [
+            {
+                name: "Basic needs",
+                icon: Package,
+                routeLink: 'support.basic-needs.index',
+                isCurrent: currentUrl.startsWith("/support/basic-needs"),
+                permission: "manage basic needs",
+            },
+            {
+                name: "Mentors",
+                icon: MessagesSquare,
+                routeLink: 'support.mentors.index',
+                isCurrent: currentUrl.startsWith("/support/mentors"),
+                permission: "manage mentorship",
+            },
+            {
+                name: "Families & repairs",
+                icon: Hammer,
+                routeLink: 'support.families',
+                isCurrent: currentUrl.startsWith("/support/families"),
+                permission: "manage home visits",
+            },
+            {
+                name: "Businesses",
+                icon: Store,
+                routeLink: 'support.businesses',
+                isCurrent: currentUrl.startsWith("/support/businesses"),
+                permission: "manage businesses",
+            },
+        ],
+    },
+    {
+        name: "Sponsors",
+        icon: HeartHandshake,
+        routeLink: 'sponsors.index',
+        isCurrent: currentUrl.startsWith("/sponsors"),
+        permission: "manage sponsors",
+    },
+    {
+        name: "Reports",
+        icon: FileBarChart,
+        routeLink: 'reports.index',
+        isCurrent: currentUrl.startsWith("/reports"),
+        permission: "export reports",
+    },
+    {
+        name: "Finance",
+        icon: Wallet,
+        permission: ["manage fees", "approve payments", "approve repairs"],
+        isCurrent: currentUrl.startsWith("/finance"),
+        isExpanded: false,
+        children: [
+            {
+                name: "Unpaid fees",
+                icon: HandCoins,
+                routeLink: 'finance.unpaid.index',
+                isCurrent: currentUrl.startsWith("/finance/unpaid-fees"),
+                permission: "manage fees",
+            },
+            {
+                name: "Approvals",
+                icon: ClipboardCheck,
+                routeLink: 'finance.approvals.index',
+                isCurrent: currentUrl.startsWith("/finance/approvals"),
+                permission: "approve payments",
+            },
+        ],
+    },
+    {
+        name: "Settings",
+        icon: SlidersHorizontal,
+        permission: "update settings",
+        isCurrent: currentUrl.startsWith("/settings"),
+        isExpanded: false,
+        children: [
+            {
+                name: "Overview",
+                icon: SlidersHorizontal,
+                routeLink: 'admin.settings.index',
+                isCurrent: currentUrl === "/settings",
+                permission: "update settings",
+            },
+            {
+                name: "Academic Calendar",
+                icon: CalendarDays,
+                routeLink: 'admin.settings.years.index',
+                isCurrent: currentUrl.startsWith("/settings/academic-years"),
+                permission: "update settings",
+            },
+            {
+                name: "Institutions",
+                icon: School,
+                routeLink: 'admin.settings.institutions.index',
+                isCurrent: currentUrl.startsWith("/settings/institutions"),
+                permission: "update settings",
+            },
+            {
+                name: "Item Categories",
+                icon: Package,
+                routeLink: 'admin.settings.item-categories.index',
+                isCurrent: currentUrl.startsWith("/settings/item-categories"),
+                permission: "update settings",
+            },
+            {
+                name: "Exit Reasons",
+                icon: DoorOpen,
+                routeLink: 'admin.settings.exit-reasons.index',
+                isCurrent: currentUrl.startsWith("/settings/exit-reasons"),
+                permission: "update settings",
+            },
+            {
+                name: "Approvals",
+                icon: ShieldCheck,
+                routeLink: 'admin.settings.approvals.edit',
+                isCurrent: currentUrl.startsWith("/settings/approvals"),
+                permission: "update settings",
             },
         ],
     },

@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\LogsActivityTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class LoanRepayment extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivityTrait;
 
     protected $guarded = [];
 
@@ -23,5 +24,10 @@ class LoanRepayment extends Model
     public function business(): BelongsTo
     {
         return $this->belongsTo(Business::class);
+    }
+
+    public function recorder(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'recorded_by');
     }
 }

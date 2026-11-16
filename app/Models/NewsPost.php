@@ -11,6 +11,15 @@ class NewsPost extends Model
 {
     use HasFactory;
 
+    /**
+     * Post categories and their public, plural labels.
+     */
+    public const CATEGORIES = [
+        'news' => 'News',
+        'success_story' => 'Success stories',
+        'activity' => 'Activity',
+    ];
+
     protected $guarded = [];
 
     protected function casts(): array

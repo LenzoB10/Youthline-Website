@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin\Website;
 
 use App\Models\Consent;
+use App\Models\NewsPost;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -21,7 +22,7 @@ class NewsPostRequest extends FormRequest
     {
         return [
             'title' => ['required', 'string', 'max:255'],
-            'category' => ['required', Rule::in(['news', 'success_story', 'activity'])],
+            'category' => ['required', Rule::in(array_keys(NewsPost::CATEGORIES))],
             'body' => ['nullable', 'string', 'max:20000'],
             'image' => ['nullable', 'image', 'max:4096'],
             'student_id' => ['nullable', 'integer', 'exists:students,id'],

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\FundingType;
+use App\Traits\LogsActivityTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Business extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivityTrait;
 
     protected $guarded = [];
 
@@ -18,6 +20,7 @@ class Business extends Model
         return [
             'start_date' => 'date',
             'amount_given' => 'decimal:2',
+            'funding_type' => FundingType::class,
             'is_running' => 'boolean',
         ];
     }
@@ -37,12 +40,20 @@ class Business extends Model
         return $this->hasMany(LoanRepayment::class);
     }
 
+    public function repaidTotal(): float
+    {
+        return (float) ($this->repaid_total ?? $this->loanRepayments()->sum('amount'));
+    }
+
+    /**
+     * What is still to be repaid on a loan (0 for grants).
+     */
     public function loanBalance(): float
     {
-        if ($this->funding_type !== 'loan') {
+        if ($this->funding_type !== FundingType::Loan) {
             return 0.0;
         }
 
-        return (float) $this->amount_given - (float) $this->loanRepayments()->sum('amount');
+        return round((float) $this->amount_given - $this->repaidTotal(), 2);
     }
 }

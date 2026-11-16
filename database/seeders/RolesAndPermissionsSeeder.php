@@ -40,6 +40,59 @@ class RolesAndPermissionsSeeder extends Seeder
         // Public website content management
         Permission::updateOrCreate(['name' => 'manage website content']);
 
+        // Students (System Guide permissions table): managers view/add/edit,
+        // change status and promote, and handle documents & consent.
+        $managerStudentPermissions = [
+            'list students',
+            'add student',
+            'update student',
+            'change student status',
+            'manage student documents',
+        ];
+        foreach ($managerStudentPermissions as $permission) {
+            Permission::updateOrCreate(['name' => $permission]);
+        }
+        // Only the Admin may permanently delete a student or a student document.
+        Permission::updateOrCreate(['name' => 'delete student']);
+        Permission::updateOrCreate(['name' => 'delete student documents']);
+
+        // Academics & fees (Phase 3): managers record results, fees and payments and
+        // can mark a payment as an error — never delete it.
+        $managerAcademicPermissions = ['record results', 'manage fees'];
+        foreach ($managerAcademicPermissions as $permission) {
+            Permission::updateOrCreate(['name' => $permission]);
+        }
+        // Admin only: sign off over-limit payments and new scholarships; delete results.
+        Permission::updateOrCreate(['name' => 'approve payments']);
+        Permission::updateOrCreate(['name' => 'delete results']);
+
+        // Support programs (Phase 4): managers view and edit every module.
+        $managerSupportPermissions = [
+            'manage basic needs',
+            'manage mentorship',
+            'manage home visits',
+            'manage businesses',
+            'manage careers',
+        ];
+        foreach ($managerSupportPermissions as $permission) {
+            Permission::updateOrCreate(['name' => $permission]);
+        }
+        // Admin only: delete support records, approve repair budgets, and read every
+        // session note (managers see notes per the Settings visibility rule).
+        Permission::updateOrCreate(['name' => 'delete support records']);
+        Permission::updateOrCreate(['name' => 'approve repairs']);
+        Permission::updateOrCreate(['name' => 'view all session notes']);
+
+        // Sponsors & reporting (Phase 5): managers keep sponsors, write progress
+        // updates and export programme reports; the Admin also deletes sponsors and
+        // sees the organisation-wide overview.
+        $managerReportingPermissions = ['manage sponsors', 'export reports'];
+        foreach ($managerReportingPermissions as $permission) {
+            Permission::updateOrCreate(['name' => $permission]);
+        }
+        Permission::updateOrCreate(['name' => 'delete sponsors']);
+        Permission::updateOrCreate(['name' => 'view organisation overview']);
+
         // Audit Log Permissions
         Permission::updateOrCreate(['name' => 'list audit logs']);
         Permission::updateOrCreate(['name' => 'see audit log details']);
@@ -55,6 +108,10 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // Assign all permissions to Admin
         $admin->givePermissionTo(Permission::all());
+
+        // Manager runs the programs day to day (and edits website content).
+        Role::updateOrCreate(['name' => 'Manager'])
+            ->givePermissionTo([...$managerStudentPermissions, ...$managerAcademicPermissions, ...$managerSupportPermissions, ...$managerReportingPermissions, 'manage website content']);
 
         $user = User::where('email', 'promisemphoola2@gmail.com')->first();
         if ($user) {

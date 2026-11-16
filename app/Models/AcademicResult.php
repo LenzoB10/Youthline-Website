@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\ResultType;
+use App\Traits\LogsActivityTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,14 +11,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class AcademicResult extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivityTrait;
 
     protected $guarded = [];
 
     protected function casts(): array
     {
         return [
+            'exam_type' => ResultType::class,
             'average' => 'decimal:2',
+            'msce_points' => 'integer',
         ];
     }
 

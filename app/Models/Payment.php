@@ -2,13 +2,21 @@
 
 namespace App\Models;
 
+use App\Enums\PaymentStatus;
+use App\Traits\LogsActivityTrait;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Payment extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivityTrait;
+
+    /**
+     * How Youthline pays schools.
+     */
+    public const METHODS = ['Bank transfer', 'Mobile money', 'Cheque', 'Cash'];
 
     protected $guarded = [];
 
@@ -17,7 +25,15 @@ class Payment extends Model
         return [
             'amount' => 'decimal:2',
             'paid_on' => 'date',
+            'status' => PaymentStatus::class,
+            'approved_at' => 'datetime',
+            'error_marked_at' => 'datetime',
         ];
+    }
+
+    public function scopePendingApproval(Builder $query): Builder
+    {
+        return $query->where('status', PaymentStatus::PendingApproval->value);
     }
 
     public function fee(): BelongsTo
@@ -38,5 +54,10 @@ class Payment extends Model
     public function approver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function errorMarker(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'error_marked_by');
     }
 }

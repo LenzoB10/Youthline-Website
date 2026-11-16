@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\LogsActivityTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Sponsorship extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivityTrait;
 
     protected $guarded = [];
 
@@ -18,6 +19,7 @@ class Sponsorship extends Model
             'start_date' => 'date',
             'end_date' => 'date',
             'amount_per_year' => 'decimal:2',
+            'progress_update_on' => 'date',
         ];
     }
 
@@ -29,5 +31,15 @@ class Sponsorship extends Model
     public function student(): BelongsTo
     {
         return $this->belongsTo(Student::class);
+    }
+
+    public function updateAuthor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'progress_update_by');
+    }
+
+    public function isActive(): bool
+    {
+        return $this->end_date === null || $this->end_date->isFuture() || $this->end_date->isToday();
     }
 }

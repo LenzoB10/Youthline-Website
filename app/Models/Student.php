@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\StudentStatus;
+use App\Traits\LogsActivityTrait;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Student extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivityTrait;
 
     protected $guarded = [];
 
@@ -20,7 +23,33 @@ class Student extends Model
         return [
             'date_of_birth' => 'date',
             'exit_date' => 'date',
+            'status' => StudentStatus::class,
         ];
+    }
+
+    /**
+     * Search by student name, guardian name or either phone number.
+     */
+    public function scopeSearch(Builder $query, ?string $term): Builder
+    {
+        if (blank($term)) {
+            return $query;
+        }
+
+        // "Grace Banda" should match first + last name; MySQL/MariaDB (production) and
+        // SQLite (development) join strings differently.
+        $fullName = in_array($query->getConnection()->getDriverName(), ['mysql', 'mariadb'], true)
+            ? "CONCAT(first_name, ' ', last_name)"
+            : "first_name || ' ' || last_name";
+
+        return $query->where(function (Builder $q) use ($term, $fullName) {
+            $q->whereRaw("{$fullName} like ?", ["%{$term}%"])
+                ->orWhere('first_name', 'like', "%{$term}%")
+                ->orWhere('last_name', 'like', "%{$term}%")
+                ->orWhere('guardian_name', 'like', "%{$term}%")
+                ->orWhere('phone', 'like', "%{$term}%")
+                ->orWhere('guardian_phone', 'like', "%{$term}%");
+        });
     }
 
     public function getFullNameAttribute(): string
@@ -60,6 +89,22 @@ class Student extends Model
             ->withTimestamps();
     }
 
+    /**
+     * Programs the student is in now. Leaving a program sets end_date — the row is kept.
+     */
+    public function activePrograms(): BelongsToMany
+    {
+        return $this->programs()->wherePivotNull('end_date');
+    }
+
+    /**
+     * The enrolment for a given academic year (one row per student per year).
+     */
+    public function enrollmentFor(?AcademicYear $year): ?Enrollment
+    {
+        return $year ? $this->enrollments()->where('academic_year_id', $year->id)->first() : null;
+    }
+
     public function results(): HasMany
     {
         return $this->hasMany(AcademicResult::class);
@@ -88,6 +133,12 @@ class Student extends Model
     public function mentorAssignments(): HasMany
     {
         return $this->hasMany(MentorAssignment::class);
+    }
+
+    public function currentMentorAssignment(): HasOne
+    {
+        return $this->hasOne(MentorAssignment::class)
+            ->ofMany(['start_date' => 'max', 'id' => 'max'], fn ($query) => $query->whereNull('end_date'));
     }
 
     public function mentorshipSessions(): HasMany

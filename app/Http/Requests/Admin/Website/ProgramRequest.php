@@ -20,7 +20,7 @@ class ProgramRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'summary' => ['nullable', 'string', 'max:1000'],
             'description' => ['nullable', 'string', 'max:5000'],
-            'image' => ['nullable', 'image', 'max:4096'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
             'display_order' => ['nullable', 'integer', 'min:0'],
         ];
     }

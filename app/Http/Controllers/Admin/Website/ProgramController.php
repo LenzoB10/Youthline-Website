@@ -23,7 +23,7 @@ class ProgramController extends Controller
             'programs' => Program::query()
                 ->orderBy('display_order')
                 ->withCount('students')
-                ->get(['id', 'name', 'summary', 'image', 'display_order']),
+                ->get(['id', 'name', 'slug', 'summary', 'image', 'display_order']),
         ]);
     }
 
@@ -46,7 +46,7 @@ class ProgramController extends Controller
     public function edit(Program $program): Response
     {
         return Inertia::render('Admin/Website/Programs/Form', [
-            'program' => $program->only(['id', 'name', 'summary', 'description', 'image', 'display_order']),
+            'program' => $program->only(['id', 'name', 'slug', 'summary', 'description', 'image', 'display_order']),
         ]);
     }
 
