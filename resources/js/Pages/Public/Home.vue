@@ -152,7 +152,7 @@ onBeforeUnmount(stop);
         <section class="overflow-hidden py-20 sm:py-24">
             <div class="yl-container grid items-center gap-14 lg:grid-cols-2 lg:gap-16">
                 <!-- Photos with a live figure (fixed proportions, so nothing hangs out of the section) -->
-                <div v-reveal:left class="relative isolate mx-auto aspect-[6/5] w-full max-w-xl">
+                <div v-reveal:left class="@container relative isolate mx-auto aspect-[6/5] w-full max-w-xl">
                     <img
                         src="/imgs/web/md/IMG20261028134052.jpg"
                         alt="Young people supported by Youthline"
@@ -173,10 +173,11 @@ onBeforeUnmount(stop);
                     />
                     <div
                         v-if="supported"
-                        class="yl-slant-card absolute right-[2%] top-[10%] rounded-md bg-yl-green-deep py-5 pl-6 pr-12 text-white shadow-xl sm:py-6 sm:pl-7 sm:pr-14"
+                        class="yl-slant-card absolute right-[2%] top-[8%] w-[36%] rounded-md bg-yl-green-deep py-[4cqw] pl-[4.5cqw] text-white shadow-xl"
                     >
-                        <p class="text-4xl font-bold leading-none sm:text-5xl">{{ supported }}<span class="text-yl-gold">+</span></p>
-                        <p class="mt-3 text-[11px] font-bold uppercase leading-snug tracking-wider text-white/90 sm:text-xs">
+                        <!-- Sized in cqw (a share of the photo group's width) so it keeps the same proportions on phones -->
+                        <p class="text-[8.5cqw] font-bold leading-none">{{ supported }}<span class="text-yl-gold">+</span></p>
+                        <p class="mt-[2.2cqw] text-[2.3cqw] font-bold uppercase leading-snug tracking-wider text-white/90">
                             Young people<br />supported
                         </p>
                     </div>
