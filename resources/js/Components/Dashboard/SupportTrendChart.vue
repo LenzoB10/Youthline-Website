@@ -158,20 +158,22 @@ watch(view, async (v) => {
 
         <div v-show="view === 'chart'" ref="el" class="h-72 w-full" role="img" aria-label="Support money given per month, stacked by school fees, basic needs, family support and businesses"></div>
 
+        <!-- Each heading and amount stays on one line; on narrow screens the table scrolls sideways
+             inside this box, with the Month column kept in view. -->
         <div v-if="view === 'table'" class="max-h-72 overflow-auto">
-            <table class="w-full text-right text-sm">
-                <thead class="sticky top-0 bg-white text-xs text-text-muted dark:bg-[#16191d]">
-                    <tr>
-                        <th class="py-2 text-left font-medium">Month</th>
-                        <th v-for="s in SERIES" :key="s.key" class="py-2 font-medium">{{ s.label }}</th>
-                        <th class="py-2 font-medium">Total</th>
+            <table class="w-full min-w-max text-right text-sm">
+                <thead class="sticky top-0 z-10 bg-white text-xs text-text-muted dark:bg-[#16191d]">
+                    <tr class="border-b border-mustBorder-light dark:border-mustBorder-dark">
+                        <th class="sticky left-0 bg-white py-2 pl-1 pr-4 text-left font-medium dark:bg-[#16191d]">Month</th>
+                        <th v-for="s in SERIES" :key="s.key" class="whitespace-nowrap px-4 py-2 font-medium">{{ s.label }}</th>
+                        <th class="whitespace-nowrap py-2 pl-4 pr-1 font-medium">Total</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-mustBorder-light dark:divide-mustBorder-dark">
                     <tr v-for="m in [...months].reverse()" :key="m.month">
-                        <td class="py-2 text-left">{{ m.label }}</td>
-                        <td v-for="s in SERIES" :key="s.key" class="py-2 text-text-muted">{{ m[s.key] ? money(m[s.key]) : '—' }}</td>
-                        <td class="py-2 font-semibold">{{ money(monthTotal(m)) }}</td>
+                        <td class="sticky left-0 whitespace-nowrap bg-white py-2 pl-1 pr-4 text-left dark:bg-[#16191d]">{{ m.label }}</td>
+                        <td v-for="s in SERIES" :key="s.key" class="whitespace-nowrap px-4 py-2 tabular-nums text-text-muted">{{ m[s.key] ? money(m[s.key]) : '—' }}</td>
+                        <td class="whitespace-nowrap py-2 pl-4 pr-1 font-semibold tabular-nums">{{ money(monthTotal(m)) }}</td>
                     </tr>
                 </tbody>
             </table>
