@@ -180,8 +180,6 @@ onBeforeUnmount(stop);
                             Young people<br />supported
                         </p>
                     </div>
-                    <!-- Accent block behind the photos -->
-                    <span class="absolute bottom-[6%] left-[8%] -z-10 h-[46%] w-[60%] rounded-md bg-yl-green/10" aria-hidden="true"></span>
                 </div>
 
                 <!-- Story and what we do -->
@@ -243,7 +241,7 @@ onBeforeUnmount(stop);
         <section v-if="testimonials.length" class="bg-white py-20 sm:py-24">
             <div class="yl-container">
                 <div v-reveal class="mx-auto max-w-2xl text-center">
-                    <p class="yl-eyebrow">Stories of change</p>
+                    <p class="yl-eyebrow">Testimonials</p>
                     <h2 class="yl-h2 mt-3">What people say about Youthline</h2>
                     <p class="mt-4 text-yl-ink/70">Students, families and supporters, in their own words.</p>
                 </div>
