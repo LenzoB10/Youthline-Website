@@ -59,7 +59,8 @@
         </div>
 
         <!-- Table - Desktop View -->
-        <div class="hidden overflow-x-auto md:block">
+        <!-- The table, on every screen size; on phones it scrolls sideways inside this box -->
+        <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-mustBorder-light dark:divide-mustBorder-dark">
                 <thead class="bg-transparent transition-colors duration-200 dark:bg-transparent">
                     <tr>
@@ -127,54 +128,6 @@
                     </template>
                 </tbody>
             </table>
-        </div>
-
-        <!-- Mobile Card View -->
-        <div class="md:hidden">
-            <template v-if="pageData.length > 0">
-                <div class="divide-y divide-mustBorder-light dark:divide-mustBorder-dark">
-                    <div v-for="(item, index) in pageData" :key="item.id"
-                        class="p-4 transition-colors duration-200 hover:bg-gray-50 dark:hover:bg-white/5"
-                        :class="{
-                            'bg-gray-50/60 dark:bg-white/[0.02]':
-                                index % 2 === 0,
-                        }">
-                        <!-- Mobile Card Content -->
-                        <div class="space-y-3">
-                            <div v-for="column in columns" :key="column.key"
-                                class="flex flex-col sm:flex-row sm:justify-between">
-                                <div
-                                    class="mb-1 text-xs font-medium uppercase tracking-wider text-text-base dark:text-text-inverted sm:mb-0 sm:w-1/3">
-                                    {{ column.label }}
-                                </div>
-                                <div class="text-sm text-text-base dark:text-text-dark-muted sm:w-2/3 sm:text-right">
-                                    <slot :name="`column-${column.key}`" :item="item">
-                                        {{ getNestedValue(item, column.key) }}
-                                    </slot>
-                                </div>
-                            </div>
-
-                            <!-- Actions for mobile -->
-                            <div v-if="$slots.actions"
-                                class="flex justify-end border-t border-mustBorder-light pt-2 dark:border-mustBorder-dark">
-                                <slot name="actions" :item="item"></slot>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </template>
-
-            <!-- Mobile Empty State -->
-            <template v-else>
-                <div class="p-6 text-center">
-                    <NoRecordFound message="No records found"
-                        description="Try adjusting your search or filter criteria or">
-                        <button @click="resetFilters" class="mt-2 text-sm font-medium text-mustGreen hover:underline">
-                            Clear filters
-                        </button>
-                    </NoRecordFound>
-                </div>
-            </template>
         </div>
 
         <!-- Pagination -->
