@@ -217,7 +217,7 @@ const nothingToShow = computed(() => !kpis.value.length && !tracksAttention.valu
         </div>
 
         <!-- KPI cards -->
-        <div v-if="kpis.length" class="mb-6 grid gap-4 sm:grid-cols-2" :class="kpiCols">
+        <div v-if="kpis.length" class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2" :class="kpiCols">
             <component
                 :is="card.href ? Link : 'div'"
                 v-for="card in kpis"
@@ -244,7 +244,7 @@ const nothingToShow = computed(() => !kpis.value.length && !tracksAttention.valu
         </div>
 
         <!-- Trend + needs attention -->
-        <div class="mb-6 grid gap-6 lg:grid-cols-3">
+        <div class="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
             <section v-if="trend" :class="[panel, tracksAttention ? 'lg:col-span-2' : 'lg:col-span-3']">
                 <div class="mb-1">
                     <h2 class="text-base font-semibold text-mustBlue dark:text-text-inverted">Support given</h2>
@@ -301,7 +301,7 @@ const nothingToShow = computed(() => !kpis.value.length && !tracksAttention.valu
         </div>
 
         <!-- Organisation overview (Admin) -->
-        <div v-if="overview" class="mb-6 grid gap-6 lg:grid-cols-3">
+        <div v-if="overview" class="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
             <section :class="panel">
                 <div class="mb-4 flex items-center justify-between">
                     <h2 class="text-base font-semibold text-mustBlue dark:text-text-inverted">Students</h2>
@@ -356,7 +356,7 @@ const nothingToShow = computed(() => !kpis.value.length && !tracksAttention.valu
                 <ul class="space-y-3.5 text-sm">
                     <li v-for="row in tracked" :key="row.program">
                         <div class="mb-1 flex justify-between gap-3">
-                            <span class="truncate text-text-muted dark:text-text-dark-muted">{{ row.program }}</span>
+                            <span class="min-w-0 text-text-muted sm:truncate dark:text-text-dark-muted">{{ row.program }}</span>
                             <span class="shrink-0 font-semibold text-mustBlue dark:text-text-inverted">{{ money(row.amount) }}</span>
                         </div>
                         <span class="block h-2 rounded-full bg-mustGreen/15 dark:bg-white/10">
