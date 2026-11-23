@@ -19,7 +19,7 @@ class ErrorPageService
     public const HANDLED = [403, 404, 500, 503];
 
     /** @var array<int, string> */
-    protected const PUBLIC_PATHS = ['/', 'about', 'programs', 'programs/*', 'impact', 'get-involved', 'news', 'news/*', 'contact'];
+    protected const PUBLIC_PATHS = ['/', 'about', 'programs', 'programs/*', 'get-involved', 'news', 'news/*', 'contact'];
 
     /** @var array<int, string> */
     protected const TITLES = [

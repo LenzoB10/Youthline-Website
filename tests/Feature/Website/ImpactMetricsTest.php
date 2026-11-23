@@ -11,6 +11,7 @@ use App\Models\Household;
 use App\Models\Program;
 use App\Models\Student;
 use App\Services\Website\ImpactMetricsService;
+use Illuminate\Support\Facades\Route;
 use Inertia\Testing\AssertableInertia;
 
 use function Pest\Laravel\get;
@@ -81,13 +82,9 @@ it('counts students per program', function () {
     expect(app(ImpactMetricsService::class)->programStudentCounts()[$program->id])->toBe(1);
 });
 
-it('exposes the full impact figures to the Our Impact page', function () {
-    get(route('impact'))
-        ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
-            ->component('Public/Impact')
-            ->has('metrics', 9)
-        );
+it('no longer has an Our Impact page', function () {
+    expect(Route::has('impact'))->toBeFalse();
+    get('/impact')->assertNotFound();
 });
 
 it('passes a four-figure headline strip to the home and about pages', function (string $route) {
@@ -96,10 +93,10 @@ it('passes a four-figure headline strip to the home and about pages', function (
         ->assertInertia(fn (AssertableInertia $page) => $page->has('impact', 4));
 })->with(['home', 'about']);
 
-it('never exposes student names on the impact page', function () {
+it('never exposes student names in the impact figures', function () {
     Student::create(['first_name' => 'Tadala', 'last_name' => 'Confidential', 'status' => 'active']);
 
-    get(route('impact'))
+    get(route('home'))
         ->assertOk()
         ->assertDontSee('Tadala')
         ->assertDontSee('Confidential');

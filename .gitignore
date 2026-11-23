@@ -21,3 +21,6 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+# Private planning documents: kept on this computer only, never pushed
+/docs/

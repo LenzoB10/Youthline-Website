@@ -56,13 +56,6 @@ class PageController extends Controller
         ]);
     }
 
-    public function impact(): Response
-    {
-        return $this->page('Public/Impact', 'impact', [
-            'metrics' => $this->impact->all(),
-        ]);
-    }
-
     public function getInvolved(): Response
     {
         return $this->page('Public/GetInvolved', 'get-involved');

@@ -52,7 +52,6 @@ const navLinks = [
     { label: 'Home', route: 'home' },
     { label: 'About', route: 'about' },
     { label: 'Our Programs', route: 'programs' },
-    { label: 'Our Impact', route: 'impact' },
     { label: 'News', route: 'news' },
     { label: 'Contact', route: 'contact' },
 ];

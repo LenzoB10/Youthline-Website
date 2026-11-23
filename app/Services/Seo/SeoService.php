@@ -26,10 +26,6 @@ class SeoService
             'title' => 'Our Programs',
             'description' => 'Six connected programs — education, basic needs, mentorship, careers, family support and entrepreneurship — that support a young person’s whole journey.',
         ],
-        'impact' => [
-            'title' => 'Our Impact',
-            'description' => 'See the difference Youthline makes: students supported, graduates, families reached, businesses started and more — counted live from our records.',
-        ],
         'get-involved' => [
             'title' => 'Get Involved',
             'description' => 'Volunteer, mentor, partner, sponsor a student, or donate — there are many ways to help a young person thrive with Youthline.',

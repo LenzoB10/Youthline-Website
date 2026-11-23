@@ -71,7 +71,6 @@ Route::controller(PageController::class)->group(function () {
     Route::get('/about', 'about')->name('about');
     Route::get('/programs', 'programs')->name('programs');
     Route::get('/programs/{program:slug}', 'program')->name('programs.show');
-    Route::get('/impact', 'impact')->name('impact');
     Route::get('/get-involved', 'getInvolved')->name('get-involved');
     Route::get('/news', 'news')->name('news');
     Route::get('/contact', 'contact')->name('contact');

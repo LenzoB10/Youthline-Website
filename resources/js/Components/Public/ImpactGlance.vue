@@ -1,6 +1,5 @@
 <script setup>
-import { Link } from '@inertiajs/vue3';
-import { ArrowRight, Award, GraduationCap, House, Users } from 'lucide-vue-next';
+import { Award, GraduationCap, House, Users } from 'lucide-vue-next';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 
 // "Youthline at a Glance": headline numbers over a parallax photo, counting up
@@ -118,12 +117,6 @@ onBeforeUnmount(() => {
                     Every number is a young person getting the education, support and
                     opportunities they need to build a brighter future.
                 </p>
-                <Link
-                    :href="route('impact')"
-                    class="mt-6 inline-flex items-center gap-2 font-semibold text-yl-gold transition hover:text-white"
-                >
-                    See our full impact <ArrowRight class="h-4 w-4" />
-                </Link>
             </div>
 
             <dl v-reveal.stagger="150" class="grid grid-cols-2 gap-y-10 sm:grid-cols-4">

@@ -186,7 +186,7 @@ select.text-input {
     @apply text-3xl font-bold text-yl-green-deep sm:text-4xl;
 }
 .yl-nav-link {
-    @apply px-3 py-2 text-sm font-medium text-yl-green-deep/80 transition hover:text-yl-green;
+    @apply px-3 py-2 text-[17px] font-semibold text-yl-green-deep/80 transition hover:text-yl-green;
 }
 .yl-nav-link-active {
     @apply text-yl-green;
@@ -338,7 +338,7 @@ select.yl-field {
 
 /* Nav links on the see-through header over the home-page photo */
 .yl-nav-link-light {
-    @apply px-3 py-2 text-sm font-medium text-white/90 transition hover:text-yl-gold;
+    @apply px-3 py-2 text-[17px] font-semibold text-white/90 transition hover:text-yl-gold;
 }
 .yl-nav-link-light-active {
     @apply text-yl-gold;

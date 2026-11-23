@@ -17,7 +17,6 @@ class SitemapService
         'home' => '1.0',
         'about' => '0.8',
         'programs' => '0.9',
-        'impact' => '0.8',
         'get-involved' => '0.9',
         'news' => '0.7',
         'contact' => '0.6',

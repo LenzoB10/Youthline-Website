@@ -12,7 +12,7 @@ use App\Models\Student;
 use Illuminate\Support\Facades\Cache;
 
 /**
- * Calculates the public "Our Impact" numbers live from the records managers
+ * Calculates the public impact numbers live from the records managers
  * enter. Only ever returns counts — never names or any personal data.
  */
 class ImpactMetricsService
@@ -37,7 +37,7 @@ class ImpactMetricsService
     }
 
     /**
-     * The full set of impact figures for the Our Impact page.
+     * The full set of impact figures (used by the Admin "Impact summary" report).
      *
      * @return array<int, array{key: string, label: string, value: int}>
      */
