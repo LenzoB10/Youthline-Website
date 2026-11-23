@@ -4,9 +4,9 @@
         <Sidebar />
 
         <!-- Main Content -->
-        <div class="flex flex-1 flex-col transition-all duration-300" :class="{ 'md:pl-64': sidebar.isOpen }">
+        <div class="flex min-w-0 flex-1 flex-col transition-all duration-300" :class="{ 'md:pl-64': sidebar.isOpen }">
             <Navbar />
-            <main class="flex-1 overflow-y-auto px-6 pt-16 transition-all duration-300">
+            <main class="min-w-0 flex-1 overflow-y-auto px-4 pt-16 transition-all duration-300 sm:px-6">
                 <div class="mx-auto max-w-7xl py-4">
                     <slot />
                 </div>
