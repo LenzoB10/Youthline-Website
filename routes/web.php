@@ -15,14 +15,15 @@ use App\Http\Controllers\Admin\Website\InvolvementRequestController;
 use App\Http\Controllers\Admin\Website\NewsletterSubscriberController;
 use App\Http\Controllers\Admin\Website\NewsPostController;
 use App\Http\Controllers\Admin\Website\PagesController;
+use App\Http\Controllers\Admin\Website\PartnerController;
 use App\Http\Controllers\Admin\Website\ProgramController;
 use App\Http\Controllers\Admin\Website\SiteSettingController;
 use App\Http\Controllers\Admin\Website\TeamMemberController;
+use App\Http\Controllers\Admin\Website\TestimonialController;
 use App\Http\Controllers\Admin\Website\WebsiteDashboardController;
 use App\Http\Controllers\BackupsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Finance\ApprovalController;
-use App\Http\Controllers\Finance\RepairApprovalController;
 use App\Http\Controllers\Finance\UnpaidFeesController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ProfileController;
@@ -43,7 +44,9 @@ use App\Http\Controllers\Support\BasicNeedsController;
 use App\Http\Controllers\Support\BusinessController;
 use App\Http\Controllers\Support\CareerController;
 use App\Http\Controllers\Support\DistributionController;
+use App\Http\Controllers\Support\FamilySupportController;
 use App\Http\Controllers\Support\HomeVisitController;
+use App\Http\Controllers\Support\HouseholdController;
 use App\Http\Controllers\Support\MentorController;
 use App\Http\Controllers\Support\MentorshipController;
 use App\Http\Controllers\Support\PhotoController;
@@ -136,21 +139,21 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/businesses/{business}', [BusinessController::class, 'destroy'])->name('businesses.destroy');
         Route::post('/businesses/{business}/checkins', [BusinessController::class, 'checkIn'])->name('businesses.checkins.store');
         Route::post('/businesses/{business}/repayments', [BusinessController::class, 'repay'])->name('businesses.repayments.store');
-        Route::put('/career-interests', [CareerController::class, 'updateInterests'])->name('interests.update');
-        Route::post('/applications', [CareerController::class, 'storeApplication'])->name('applications.store');
-        Route::put('/applications/{application}', [CareerController::class, 'updateApplication'])->name('applications.update');
-        Route::delete('/applications/{application}', [CareerController::class, 'destroyApplication'])->name('applications.destroy');
         Route::post('/outcomes', [CareerController::class, 'storeOutcome'])->name('outcomes.store');
         Route::delete('/outcomes/{alumniOutcome}', [CareerController::class, 'destroyOutcome'])->name('outcomes.destroy');
     });
 
-    // Visits and repairs belong to the student's HOUSEHOLD (checked in the controller).
-    Route::prefix('students/{student}')->name('students.')->group(function () {
+    // Families (Support → Families): any family Youthline supports, with its visits and the support given.
+    Route::get('/support/families', [HouseholdController::class, 'index'])->name('support.families');
+    Route::post('/support/families', [HouseholdController::class, 'store'])->name('support.families.store');
+    Route::prefix('support/families/{household}')->name('support.families.')->scopeBindings()->group(function () {
+        Route::get('/', [HouseholdController::class, 'show'])->name('show');
+        Route::put('/', [HouseholdController::class, 'update'])->name('update');
+        Route::put('/consent', [HouseholdController::class, 'updateConsent'])->name('consent');
         Route::post('/visits', [HomeVisitController::class, 'storeVisit'])->name('visits.store');
         Route::delete('/visits/{homeVisit}', [HomeVisitController::class, 'destroyVisit'])->name('visits.destroy');
-        Route::post('/repairs', [HomeVisitController::class, 'storeRepair'])->name('repairs.store');
-        Route::post('/repairs/{repairProject}/advance', [HomeVisitController::class, 'advanceRepair'])->name('repairs.advance');
-        Route::delete('/repairs/{repairProject}', [HomeVisitController::class, 'destroyRepair'])->name('repairs.destroy');
+        Route::post('/support', [FamilySupportController::class, 'store'])->name('support.store');
+        Route::delete('/support/{familySupport}', [FamilySupportController::class, 'destroy'])->name('support.destroy');
     });
 
     // Support overview pages
@@ -161,7 +164,6 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/mentors/{mentor}', [MentorController::class, 'destroy'])->name('mentors.destroy');
         Route::get('/basic-needs', [BasicNeedsController::class, 'index'])->name('basic-needs.index');
         Route::post('/basic-needs/group-handout', [BasicNeedsController::class, 'groupHandout'])->name('basic-needs.group');
-        Route::get('/families', [SupportOverviewController::class, 'families'])->name('families');
         Route::get('/businesses', [SupportOverviewController::class, 'businesses'])->name('businesses');
         Route::get('/photos/{photo}', [PhotoController::class, 'show'])->name('photos.show');
         Route::delete('/photos/{photo}', [PhotoController::class, 'destroy'])->name('photos.destroy');
@@ -186,12 +188,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/unpaid-fees', [UnpaidFeesController::class, 'index'])->name('unpaid.index');
         Route::get('/unpaid-fees/export', [UnpaidFeesController::class, 'export'])->name('unpaid.export');
         Route::get('/approvals', [ApprovalController::class, 'index'])->name('approvals.index');
-        Route::put('/approvals/payments/{payment}/approve', [ApprovalController::class, 'approvePayment'])->name('approvals.payments.approve');
-        Route::put('/approvals/payments/{payment}/reject', [ApprovalController::class, 'rejectPayment'])->name('approvals.payments.reject');
         Route::put('/approvals/scholarships/{fee}/approve', [ApprovalController::class, 'approveScholarship'])->name('approvals.scholarships.approve');
         Route::put('/approvals/scholarships/{fee}/reject', [ApprovalController::class, 'rejectScholarship'])->name('approvals.scholarships.reject');
-        Route::put('/approvals/repairs/{repairProject}/approve', [RepairApprovalController::class, 'approve'])->name('approvals.repairs.approve');
-        Route::put('/approvals/repairs/{repairProject}/reject', [RepairApprovalController::class, 'reject'])->name('approvals.repairs.reject');
     });
 
     Route::name('admin.')->group(function () {
@@ -253,6 +251,8 @@ Route::middleware(['auth'])->group(function () {
 
             Route::resource('programs', ProgramController::class)->except('show');
             Route::resource('team', TeamMemberController::class)->except('show');
+            Route::resource('testimonials', TestimonialController::class)->except('show');
+            Route::resource('partners', PartnerController::class)->except('show');
 
             Route::get('/values', [CoreValueController::class, 'index'])->name('values.index');
             Route::post('/values', [CoreValueController::class, 'store'])->name('values.store');

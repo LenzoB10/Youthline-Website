@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Enums\PaymentStatus;
 use App\Traits\LogsActivityTrait;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -29,11 +28,6 @@ class Payment extends Model
             'approved_at' => 'datetime',
             'error_marked_at' => 'datetime',
         ];
-    }
-
-    public function scopePendingApproval(Builder $query): Builder
-    {
-        return $query->where('status', PaymentStatus::PendingApproval->value);
     }
 
     public function fee(): BelongsTo

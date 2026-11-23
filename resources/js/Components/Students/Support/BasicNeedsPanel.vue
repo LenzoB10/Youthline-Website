@@ -21,11 +21,11 @@ const canDelete = can('delete support records');
 const today = new Date().toISOString().slice(0, 10);
 const money = (v) => formatMoney(v, props.currency);
 
-const form = useForm({ given_on: today, amount: '' });
+const form = useForm({ given_on: today, amount: '', note: '' });
 const submit = () =>
     form.post(route('students.distributions.store', props.student.id), {
         preserveScroll: true,
-        onSuccess: () => form.reset('amount'),
+        onSuccess: () => form.reset('amount', 'note'),
     });
 
 const deleting = ref(null);
@@ -58,9 +58,12 @@ const destroy = () => {
             </div>
         </dl>
 
+        <p v-if="canRecord && !data.canReceive" class="mb-5 rounded-lg border border-dashed border-mustBorder-light p-4 text-sm text-text-muted dark:border-mustBorder-dark">
+            {{ student.first_name ?? 'This student' }} has graduated, so no more basic needs can be given. Graduates can still be supported with business money on the Business tab.
+        </p>
         <form
-            v-if="canRecord"
-            class="mb-5 grid gap-3 rounded-lg border border-dashed border-mustBorder-light p-4 sm:grid-cols-[12rem_1fr_auto] sm:items-end dark:border-mustBorder-dark"
+            v-else-if="canRecord"
+            class="mb-5 grid gap-3 rounded-lg border border-dashed border-mustBorder-light p-4 sm:grid-cols-[11rem_11rem_1fr_auto] sm:items-end dark:border-mustBorder-dark"
             @submit.prevent="submit"
         >
             <div>
@@ -72,6 +75,11 @@ const destroy = () => {
                 <InputLabel for="bn_amount" :value="`Amount (${currency})`" />
                 <TextInput id="bn_amount" v-model="form.amount" type="number" min="0.01" step="0.01" placeholder="e.g. 20000" class="mt-1 block w-full" required />
                 <InputError class="mt-1" :message="form.errors.amount" />
+            </div>
+            <div>
+                <InputLabel for="bn_note" value="Note (optional)" />
+                <TextInput id="bn_note" v-model="form.note" placeholder="e.g. Groceries for November" class="mt-1 block w-full" />
+                <InputError class="mt-1" :message="form.errors.note" />
             </div>
             <button type="submit" class="btn-primary-sm" :disabled="form.processing">Record</button>
         </form>

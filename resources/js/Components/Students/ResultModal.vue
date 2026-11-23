@@ -77,7 +77,7 @@ const submit = () => {
         <div class="p-6">
             <ModalHeader :title="result ? 'Edit result' : 'Record a result'" :close="close" />
 
-            <p v-if="!terms.length" class="rounded-lg bg-amber-50 p-3 text-sm text-amber-800">
+            <p v-if="!terms.length" class="rounded-lg bg-yl-gold/10 p-3 text-sm text-amber-800">
                 No terms exist yet. An Admin can add them under Settings → Academic Calendar.
             </p>
 

@@ -9,7 +9,7 @@ defineProps({
 <template>
     <article class="group">
         <Link :href="route('news.show', post.id)" class="block focus:outline-none">
-            <div class="aspect-[16/9] overflow-hidden bg-yl-green/10">
+            <div class="aspect-[16/9] overflow-hidden rounded-md bg-yl-green/10">
                 <img
                     v-if="post.image"
                     :src="post.image"

@@ -5,9 +5,9 @@ namespace App\Services\Website;
 use App\Models\AcademicResult;
 use App\Models\AlumniOutcome;
 use App\Models\Business;
+use App\Models\FamilySupport;
 use App\Models\Household;
 use App\Models\Program;
-use App\Models\RepairProject;
 use App\Models\Student;
 use Illuminate\Support\Facades\Cache;
 
@@ -52,7 +52,7 @@ class ImpactMetricsService
             ['key' => 'graduates', 'label' => 'Graduates', 'value' => $raw['graduates']],
             ['key' => 'msce', 'label' => 'Sat their MSCE exams', 'value' => $raw['msce']],
             ['key' => 'families', 'label' => 'Families reached through home visits', 'value' => $raw['families']],
-            ['key' => 'repairs', 'label' => 'Home repairs completed', 'value' => $raw['repairs']],
+            ['key' => 'family_support', 'label' => 'Families given direct support', 'value' => $raw['family_support']],
             ['key' => 'businesses', 'label' => 'Youth businesses started', 'value' => $raw['businesses']],
             ['key' => 'alumni_active', 'label' => 'Alumni employed or studying', 'value' => $raw['alumni_active']],
         ];
@@ -83,7 +83,7 @@ class ImpactMetricsService
                 'graduates' => Student::query()->where('status', 'graduated')->count(),
                 'msce' => AcademicResult::query()->where('exam_type', 'msce')->distinct()->count('student_id'),
                 'families' => Household::query()->whereHas('homeVisits')->count(),
-                'repairs' => RepairProject::query()->where('status', 'completed')->count(),
+                'family_support' => FamilySupport::query()->distinct()->count('household_id'),
                 'businesses' => Business::query()->count(),
                 'alumni_active' => AlumniOutcome::query()
                     ->whereIn('outcome', ['employed', 'further_study'])

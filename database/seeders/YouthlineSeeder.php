@@ -5,10 +5,8 @@ namespace Database\Seeders;
 use App\Models\AcademicResult;
 use App\Models\AcademicYear;
 use App\Models\AlumniOutcome;
-use App\Models\Application;
 use App\Models\Business;
 use App\Models\BusinessCheckin;
-use App\Models\CareerInterest;
 use App\Models\Consent;
 use App\Models\ContactInfo;
 use App\Models\ContactMessage;
@@ -17,6 +15,7 @@ use App\Models\Distribution;
 use App\Models\Document;
 use App\Models\Donation;
 use App\Models\Enrollment;
+use App\Models\FamilySupport;
 use App\Models\Fee;
 use App\Models\HomeVisit;
 use App\Models\Household;
@@ -32,7 +31,6 @@ use App\Models\NewsPost;
 use App\Models\Page;
 use App\Models\Payment;
 use App\Models\Program;
-use App\Models\RepairProject;
 use App\Models\SiteSetting;
 use App\Models\Sponsor;
 use App\Models\Sponsorship;
@@ -414,7 +412,6 @@ class YouthlineSeeder extends Seeder
                         'method' => fake()->randomElement(['Bank transfer', 'Cheque', 'Cash']),
                         'reference' => 'PMT-'.strtoupper(Str::random(8)),
                         'receipt_document_id' => $receipt->id,
-                        // over-limit payments start pending_approval and record the approver
                         'status' => $big ? 'paid' : 'paid',
                         'recorded_by' => $this->manager->id,
                         'approved_by' => $big ? $this->admin->id : null,
@@ -445,7 +442,7 @@ class YouthlineSeeder extends Seeder
                 'recorded_by' => $this->manager->id,
             ]);
 
-            // Family: home visit + a repair project on some households
+            // Family: home visit + support given to some households
             HomeVisit::create([
                 'household_id' => $household->id,
                 'visit_date' => now()->subMonths(2),
@@ -456,13 +453,13 @@ class YouthlineSeeder extends Seeder
                 'recorded_by' => $this->manager->id,
             ]);
             if ($i % 3 === 0) {
-                RepairProject::create([
+                FamilySupport::create([
                     'household_id' => $household->id,
-                    'description' => 'Roof repair and new door.',
-                    'estimated_cost' => 120000,
-                    'actual_cost' => $i === 0 ? 115000 : null,
-                    'status' => $i === 0 ? 'completed' : 'planned',
-                    'approved_by' => $this->admin->id,
+                    'given_on' => now()->subMonths(1)->toDateString(),
+                    'type' => $i === 0 ? 'home_repair' : 'food',
+                    'description' => $i === 0 ? 'Roof repair and new door' : 'Maize and cooking oil',
+                    'amount' => $i === 0 ? 115000 : 45000,
+                    'created_by' => $this->manager->id,
                 ]);
             }
 
@@ -484,18 +481,6 @@ class YouthlineSeeder extends Seeder
                 ]);
                 LoanRepayment::create(['business_id' => $business->id, 'amount' => 20000, 'paid_on' => now()->subMonths(2)]);
                 LoanRepayment::create(['business_id' => $business->id, 'amount' => 20000, 'paid_on' => now()->subMonth()]);
-            }
-
-            // Careers & applications
-            CareerInterest::create(['student_id' => $student->id, 'interest' => fake()->randomElement(['Medicine', 'Engineering', 'Teaching', 'Business'])]);
-            if (in_array($lvl25, ['form_4', 'year_1']) || $status === 'graduated') {
-                Application::create([
-                    'student_id' => $student->id,
-                    'type' => fake()->randomElement(['university', 'scholarship']),
-                    'organisation' => $university->name,
-                    'applied_on' => '2025-02-01',
-                    'status' => fake()->randomElement(['applied', 'accepted', 'rejected']),
-                ]);
             }
 
             // Graduated: alumni outcome

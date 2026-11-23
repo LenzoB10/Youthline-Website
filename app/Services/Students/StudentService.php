@@ -107,11 +107,21 @@ class StudentService
     /**
      * Change status. Leaving always records a reason and date; returning to Active
      * clears them (the previous values stay in the audit log).
+     *
+     * Undoing an exit (e.g. Graduated set by mistake) reopens the programs that
+     * the exit closed, so the correction leaves the student as they were.
      */
     public function changeStatus(Student $student, StudentStatus $to, ?string $reason = null, ?Carbon $on = null): Student
     {
         return DB::transaction(function () use ($student, $to, $reason, $on) {
             $on ??= today();
+
+            if ($student->status->endsPrograms() && ! $to->endsPrograms() && $student->exit_date) {
+                $student->studentPrograms()
+                    ->whereDate('end_date', $student->exit_date)
+                    ->whereNotIn('program_id', $student->studentPrograms()->whereNull('end_date')->select('program_id'))
+                    ->update(['end_date' => null]);
+            }
 
             if ($to->endsPrograms()) {
                 $this->syncPrograms($student, [], $on);

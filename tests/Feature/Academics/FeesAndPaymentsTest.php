@@ -7,11 +7,11 @@ use App\Models\Fee;
 use App\Models\Institution;
 use App\Models\Payment;
 use App\Notifications\ApprovalDecided;
-use App\Notifications\PaymentAwaitingApproval;
 use App\Notifications\ScholarshipAwaitingApproval;
 use App\Services\Fees\BalanceService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
 use function Pest\Laravel\actingAs;
@@ -77,45 +77,21 @@ it('validates fee amounts and one entry per term', function () {
 
 // --- Payments & approvals ----------------------------------------------------
 
-it('counts small payments straight away and holds over-limit ones for the Admin', function () {
-    $fee = makeFee($this->student, $this->t1, 900000);
+it('counts every payment straight away, whatever the amount, with no approval step', function () {
+    $fee = makeFee($this->student, $this->t1, 2000000);
 
     actingAs($this->manager);
-    pay($fee, ['amount' => 100000, 'receipt' => UploadedFile::fake()->create('receipt.pdf', 50, 'application/pdf')])->assertSessionHasNoErrors();
-    pay($fee, ['amount' => 600000])->assertSessionHasNoErrors(); // over the 500,000 default limit
+    pay($fee, ['amount' => 100000, 'receipt' => UploadedFile::fake()->create('receipt.pdf', 50, 'application/pdf')])->assertSessionHas('success', 'Payment recorded.');
+    pay($fee, ['amount' => 1500000])->assertSessionHas('success', 'Payment recorded.');
 
     [$small, $big] = Payment::query()->oldest('id')->get();
     expect($small->status)->toBe(PaymentStatus::Paid)
         ->and($small->receipt->type->value)->toBe('receipt')
-        ->and($big->status)->toBe(PaymentStatus::PendingApproval)
-        ->and($fee->fresh()->balance())->toBe(800000.0); // pending doesn't count
+        ->and($big->status)->toBe(PaymentStatus::Paid)
+        ->and($fee->fresh()->balance())->toBe(400000.0);
 
-    Notification::assertSentTo($this->admin, PaymentAwaitingApproval::class);
-
-    actingAs($this->manager)->put(route('finance.approvals.payments.approve', $big))->assertForbidden();
-    actingAs($this->admin)->put(route('finance.approvals.payments.approve', $big))->assertSessionHas('success');
-
-    expect($big->fresh()->status)->toBe(PaymentStatus::Paid)
-        ->and($big->fresh()->approved_by)->toBe($this->admin->id)
-        ->and($fee->fresh()->balance())->toBe(200000.0);
-});
-
-it('lets the Admin reject with a reason, and an Admin\'s own large payment is approved on entry', function () {
-    $fee = makeFee($this->student, $this->t1, 2000000);
-
-    actingAs($this->manager);
-    pay($fee, ['amount' => 700000]);
-    $pending = Payment::query()->sole();
-
-    actingAs($this->admin)->put(route('finance.approvals.payments.reject', $pending), ['reason' => ''])->assertSessionHasErrors('reason');
-    actingAs($this->admin)->put(route('finance.approvals.payments.reject', $pending), ['reason' => 'Wrong school account'])->assertSessionHasNoErrors();
-    expect($pending->fresh()->status)->toBe(PaymentStatus::Rejected)
-        ->and($pending->fresh()->rejection_reason)->toBe('Wrong school account');
-
-    actingAs($this->admin);
-    pay($fee, ['amount' => 700000]);
-    $own = Payment::query()->latest('id')->first();
-    expect($own->status)->toBe(PaymentStatus::Paid)->and($own->approved_by)->toBe($this->admin->id);
+    Notification::assertNothingSent();
+    expect(Route::has('finance.approvals.payments.approve'))->toBeFalse();
 });
 
 it('never lets a payment exceed what is still owed', function () {
@@ -178,7 +154,6 @@ it('reconciles balances per student and per school', function () {
     Payment::create(['fee_id' => $a2->id, 'amount' => 20000, 'status' => PaymentStatus::Paid]);
     Payment::create(['fee_id' => $a2->id, 'amount' => 5000, 'status' => PaymentStatus::Error]);
     Payment::create(['fee_id' => $b1->id, 'amount' => 100000, 'status' => PaymentStatus::Paid]);
-    Payment::create(['fee_id' => $b1->id, 'amount' => 50000, 'status' => PaymentStatus::PendingApproval]);
 
     $balances = app(BalanceService::class);
 
@@ -186,8 +161,7 @@ it('reconciles balances per student and per school', function () {
 
     $byStudent = $balances->unpaidByStudent()->keyBy('student_id');
     expect($byStudent[$this->student->id]['balance'])->toBe(25000.0)
-        ->and($byStudent[$other->id]['balance'])->toBe(200000.0)
-        ->and($byStudent[$other->id]['awaiting_approval'])->toBe(50000.0);
+        ->and($byStudent[$other->id]['balance'])->toBe(200000.0);
 
     $bySchool = $balances->unpaidBySchool()->keyBy('school');
     expect($bySchool['MUST']['balance'])->toBe(200000.0)

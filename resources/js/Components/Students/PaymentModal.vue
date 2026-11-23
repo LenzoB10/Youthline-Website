@@ -15,8 +15,6 @@ const props = defineProps({
     fee: { type: Object, default: null },
     methods: { type: Array, default: () => [] },
     currency: { type: String, default: 'MWK' },
-    paymentLimit: { type: Number, default: null }, // null when approvals are off
-    canApprove: { type: Boolean, default: false },
 });
 const emit = defineEmits(['close']);
 
@@ -37,7 +35,6 @@ watch(
 );
 
 const methodOptions = computed(() => props.methods.map((m) => ({ value: m, label: m })));
-const overLimit = computed(() => props.paymentLimit !== null && Number(form.amount) > props.paymentLimit);
 
 const close = () => emit('close');
 const submit = () =>
@@ -70,11 +67,6 @@ const submit = () =>
                         <InputError class="mt-2" :message="form.errors.paid_on" />
                     </div>
                 </div>
-                <p v-if="overLimit" class="rounded-lg bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">
-                    This is over the approval limit of {{ formatMoney(paymentLimit, currency) }}.
-                    <template v-if="canApprove">As an Admin, recording it also approves it.</template>
-                    <template v-else>It will wait for an Admin to approve it before it counts.</template>
-                </p>
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div>
                         <InputLabel for="pay_method" value="Method" />

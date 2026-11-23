@@ -93,8 +93,8 @@ it('raises an alert when a term average drops sharply, and not for small dips', 
 
 it('uses the Admin\'s threshold from Settings', function () {
     actingAs($this->admin)->put(route('admin.settings.approvals.update'), [
-        'currency' => 'MWK', 'require_payment_approval' => true, 'payment_approval_limit' => 500000,
-        'require_scholarship_approval' => true, 'require_repair_approval' => true, 'repair_approval_limit' => 1000000,
+        'currency' => 'MWK',
+        'require_scholarship_approval' => true,
         'counselling_notes_visibility' => 'author', 'grade_drop_threshold' => 3,
     ])->assertSessionHasNoErrors();
 

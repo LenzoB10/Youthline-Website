@@ -237,24 +237,17 @@ it('locks the name of exit reasons already on student records', function () {
 
 it('saves approval settings, records who changed them, and applies them', function () {
     $service = app(SystemSettingsService::class);
-    expect($service->paymentNeedsApproval(600000))->toBeTrue(); // default limit 500,000
+    expect($service->scholarshipNeedsApproval())->toBeTrue();
 
     actingAs($this->admin)
         ->put(route('admin.settings.approvals.update'), [
             'currency' => 'MWK',
-            'require_payment_approval' => true,
-            'payment_approval_limit' => 750000,
             'require_scholarship_approval' => false,
-            'require_repair_approval' => false,
-            'repair_approval_limit' => 1000000,
             'counselling_notes_visibility' => 'author',
         ])
         ->assertSessionHasNoErrors();
 
     expect(SystemSetting::first()->updated_by)->toBe($this->admin->id)
-        ->and($service->paymentNeedsApproval(600000))->toBeFalse()
-        ->and($service->paymentNeedsApproval(750000.01))->toBeTrue()
-        ->and($service->repairNeedsApproval(5000000))->toBeFalse()
         ->and($service->scholarshipNeedsApproval())->toBeFalse();
 });
 
@@ -262,12 +255,8 @@ it('validates approval settings', function () {
     actingAs($this->admin)
         ->put(route('admin.settings.approvals.update'), [
             'currency' => 'kwacha',
-            'require_payment_approval' => true,
-            'payment_approval_limit' => -5,
-            'require_scholarship_approval' => true,
-            'require_repair_approval' => true,
-            'repair_approval_limit' => 100,
+            'require_scholarship_approval' => 'maybe',
             'counselling_notes_visibility' => 'everyone',
         ])
-        ->assertSessionHasErrors(['currency', 'payment_approval_limit', 'counselling_notes_visibility']);
+        ->assertSessionHasErrors(['currency', 'require_scholarship_approval', 'counselling_notes_visibility']);
 });

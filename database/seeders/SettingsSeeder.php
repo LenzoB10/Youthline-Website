@@ -36,11 +36,7 @@ class SettingsSeeder extends Seeder
         if (! SystemSetting::query()->exists()) {
             SystemSetting::query()->create([
                 'currency' => 'MWK',
-                'require_payment_approval' => true,
-                'payment_approval_limit' => 500000,
                 'require_scholarship_approval' => true,
-                'require_repair_approval' => true,
-                'repair_approval_limit' => 1000000,
                 'counselling_notes_visibility' => 'author',
             ]);
         }

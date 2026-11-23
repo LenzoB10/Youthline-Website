@@ -5,7 +5,6 @@ namespace App\Enums;
 enum PaymentStatus: string
 {
     case Paid = 'paid';
-    case PendingApproval = 'pending_approval';
     case Rejected = 'rejected';
     case Error = 'error';
 
@@ -13,7 +12,6 @@ enum PaymentStatus: string
     {
         return match ($this) {
             self::Paid => 'Paid',
-            self::PendingApproval => 'Awaiting approval',
             self::Rejected => 'Rejected',
             self::Error => 'Marked as error',
         };
@@ -28,10 +26,11 @@ enum PaymentStatus: string
     }
 
     /**
-     * A recorded payment can be marked as an error; one already rejected or in error cannot.
+     * Only a paid payment can be marked as an error. (Rejected payments are kept
+     * from before payment approvals were removed.)
      */
     public function canBeMarkedAsError(): bool
     {
-        return in_array($this, [self::Paid, self::PendingApproval], true);
+        return $this === self::Paid;
     }
 }

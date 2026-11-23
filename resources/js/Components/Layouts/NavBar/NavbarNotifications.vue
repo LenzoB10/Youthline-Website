@@ -14,9 +14,9 @@
             leave-active-class="transition duration-150 ease-in" leave-from-class="transform scale-100 opacity-100"
             leave-to-class="transform scale-95 opacity-0">
             <div v-if="showNotifications"
-                class="absolute right-0 z-30 mt-2 w-80 origin-top-right overflow-hidden rounded-xl border border-gray-200 bg-background-card shadow-lg dark:border-gray-700 dark:bg-background-dark-card"
+                class="absolute right-0 z-30 mt-2 w-80 origin-top-right overflow-hidden surface-raised rounded-2xl"
                 v-click-outside="closeNotifications">
-                <div class="border-b border-gray-200 px-4 py-3 dark:border-gray-700 dark:bg-background-dark-card">
+                <div class="border-b border-gray-200 px-4 py-3">
                     <div class="flex justify-between items-center">
                         <h3 class="text-sm font-medium text-text-base dark:text-text-inverted">
                             Notifications

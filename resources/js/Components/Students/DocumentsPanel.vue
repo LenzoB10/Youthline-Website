@@ -94,7 +94,7 @@ const destroy = () => {
                         <template v-if="doc.size"> · {{ size(doc.size) }}</template>
                         <template v-if="doc.uploaded_at"> · {{ new Date(doc.uploaded_at).toLocaleDateString() }}</template>
                         <template v-if="doc.uploaded_by"> · {{ doc.uploaded_by }}</template>
-                        <span v-if="doc.is_consent_evidence" class="ml-1 rounded-full bg-green-100 px-1.5 py-0.5 text-green-800">Backs current consent</span>
+                        <span v-if="doc.is_consent_evidence" class="ml-1 rounded-full bg-mustGreen/15 px-1.5 py-0.5 text-yl-green-deep">Backs current consent</span>
                     </p>
                 </div>
                 <div class="flex items-center gap-3">

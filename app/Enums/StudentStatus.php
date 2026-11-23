@@ -57,19 +57,23 @@ enum StudentStatus: string
     }
 
     /**
-     * Where a student can move from this status.
+     * Where a student can move from this status: any other status, so a status
+     * set by mistake (e.g. Graduated instead of Active) can always be corrected.
+     * Every change is kept in the audit log.
      *
      * @return array<int, self>
      */
     public function allowedTransitions(): array
     {
-        return match ($this) {
-            self::Applicant => [self::Active, self::DroppedOut, self::Transferred],
-            self::Active => [self::Graduated, self::DroppedOut, self::Transferred, self::Paused],
-            // Any student who left can be re-admitted.
-            self::Paused => [self::Active, self::Graduated, self::DroppedOut, self::Transferred],
-            self::Graduated, self::DroppedOut, self::Transferred => [self::Active],
-        };
+        return array_values(array_filter(self::cases(), fn (self $status) => $status !== $this));
+    }
+
+    /**
+     * Graduates are only supported with business money; basic needs stop at graduation.
+     */
+    public function canReceiveBasicNeeds(): bool
+    {
+        return $this !== self::Graduated;
     }
 
     public function canMoveTo(self $status): bool

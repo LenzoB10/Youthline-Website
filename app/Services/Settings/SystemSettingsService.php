@@ -32,25 +32,6 @@ class SystemSettingsService
         return $settings;
     }
 
-    /**
-     * Payments above the Admin's limit start as pending_approval.
-     */
-    public function paymentNeedsApproval(float|string $amount): bool
-    {
-        $settings = $this->get();
-
-        return $settings->require_payment_approval
-            && (float) $amount > (float) $settings->payment_approval_limit;
-    }
-
-    public function repairNeedsApproval(float|string $budget): bool
-    {
-        $settings = $this->get();
-
-        return $settings->require_repair_approval
-            && (float) $budget > (float) $settings->repair_approval_limit;
-    }
-
     public function scholarshipNeedsApproval(): bool
     {
         return $this->get()->require_scholarship_approval;

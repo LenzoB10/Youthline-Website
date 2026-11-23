@@ -66,8 +66,8 @@ class HomeVisitService
     }
 
     /**
-     * Households with an active student that were never visited, or whose next
-     * visit falls within the coming two weeks (or has passed).
+     * Families currently supported (students' homes and community families) that
+     * were never visited, or whose next visit falls within two weeks (or has passed).
      *
      * @return Collection<int, array<string, mixed>>
      */
@@ -76,16 +76,15 @@ class HomeVisitService
         $cutoff = now()->addDays($withinDays)->endOfDay();
 
         return Household::query()
-            ->whereHas('students', fn ($q) => $q->where('status', StudentStatus::Active->value))
+            ->supported()
             ->with(['latestVisit', 'students' => fn ($q) => $q->where('status', StudentStatus::Active->value)])
             ->get()
             ->filter(fn (Household $h) => ! $h->latestVisit || ! $h->latestVisit->next_visit_due || $h->latestVisit->next_visit_due->lte($cutoff))
             ->sortBy(fn (Household $h) => $h->latestVisit?->next_visit_due?->timestamp ?? 0)
             ->map(fn (Household $h) => [
                 'household_id' => $h->id,
-                'household' => $h->head_name ?: 'Unnamed household',
+                'household' => $h->displayName(),
                 'area' => collect([$h->village_area, $h->district])->filter()->join(', '),
-                'student_id' => $h->students->first()?->id,
                 'students' => $h->students->map->full_name->values()->all(),
                 'last_visit' => $h->latestVisit?->visit_date?->toDateString(),
                 'next_visit_due' => $h->latestVisit?->next_visit_due?->toDateString(),

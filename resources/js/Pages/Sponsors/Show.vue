@@ -1,4 +1,5 @@
 <script setup>
+import BackLink from '@/Components/Common/BackLink.vue';
 import ConfirmationModal from '@/Components/Common/Modal/ConfirmationModal.vue';
 import Modal from '@/Components/Common/Modal/Modal.vue';
 import ModalHeader from '@/Components/Common/Modal/ModalHeader.vue';
@@ -13,7 +14,7 @@ import { formatMoney } from '@/Helpers/money';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import SponsorForm from '@/Pages/Sponsors/Partials/SponsorForm.vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
-import { ArrowLeft, FileDown, MessageSquareText, Plus, SquarePen, Trash2 } from 'lucide-vue-next';
+import { FileDown, MessageSquareText, Plus, SquarePen, Trash2 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
 const props = defineProps({
@@ -72,7 +73,7 @@ const saveUpdate = () =>
     <Head :title="sponsor.name" />
 
     <AuthenticatedLayout>
-        <Link :href="route('sponsors.index')" class="mb-4 inline-flex items-center gap-1 text-sm text-mustBlue dark:text-text-dark-muted"><ArrowLeft class="h-4 w-4" /> Sponsors</Link>
+        <BackLink :href="route('sponsors.index')">Sponsors</BackLink>
 
         <div class="card-container mb-4">
             <div class="flex flex-wrap items-start justify-between gap-4">
@@ -87,7 +88,7 @@ const saveUpdate = () =>
                     <button v-if="can('delete sponsors')" type="button" class="btn-danger-sm inline-flex items-center gap-1" @click="deletingSponsor = true"><Trash2 class="h-4 w-4" /> Delete</button>
                 </div>
             </div>
-            <p v-if="missingUpdates" class="mt-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">
+            <p v-if="missingUpdates" class="mt-4 rounded-lg bg-yl-gold/10 p-3 text-sm text-amber-800 dark:bg-yl-gold/10 dark:text-yl-gold">
                 {{ missingUpdates }} {{ missingUpdates === 1 ? 'student has' : 'students have' }} no progress update yet. Add a short note before sending the report.
             </p>
         </div>

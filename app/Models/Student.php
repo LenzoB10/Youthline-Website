@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\EducationLevel;
 use App\Enums\StudentStatus;
 use App\Traits\LogsActivityTrait;
 use Illuminate\Database\Eloquent\Builder;
@@ -75,6 +76,22 @@ class Student extends Model
     public function currentEnrollment(): HasOne
     {
         return $this->hasOne(Enrollment::class)->latestOfMany();
+    }
+
+    /**
+     * Statuses this student can move to now. Graduated is only offered to
+     * students whose latest level is Year 4 or Year 5.
+     *
+     * @return array<int, StudentStatus>
+     */
+    public function availableStatuses(): array
+    {
+        $level = EducationLevel::tryFrom((string) $this->currentEnrollment?->level);
+
+        return array_values(array_filter(
+            $this->status->allowedTransitions(),
+            fn (StudentStatus $status) => $status !== StudentStatus::Graduated || ($level?->canGraduate() ?? false),
+        ));
     }
 
     public function studentPrograms(): HasMany

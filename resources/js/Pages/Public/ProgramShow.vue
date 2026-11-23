@@ -36,7 +36,7 @@ const paragraphs = computed(() =>
                     <img
                         :src="program.image"
                         :alt="program.name"
-                        class="mt-8 aspect-[16/9] w-full object-cover object-[center_30%] shadow-md"
+                        class="mt-8 aspect-[16/9] w-full rounded-md object-cover object-[center_30%] shadow-md"
                     />
 
                     <div class="mt-8 space-y-5 text-lg leading-relaxed text-yl-ink/75">
@@ -72,7 +72,7 @@ const paragraphs = computed(() =>
                         <Link :href="route('get-involved')" class="yl-btn-accent mt-6">Get involved</Link>
                     </div>
 
-                    <div v-if="otherPrograms.length" class="bg-yl-cream p-8">
+                    <div v-if="otherPrograms.length" class="rounded-md bg-yl-cream p-8">
                         <h2 class="text-lg font-bold text-yl-green-deep">Other programs</h2>
                         <ul class="mt-4 divide-y divide-gray-200">
                             <li v-for="other in otherPrograms" :key="other.id">
@@ -84,7 +84,7 @@ const paragraphs = computed(() =>
                                         :src="other.image"
                                         alt=""
                                         loading="lazy"
-                                        class="h-14 w-14 shrink-0 object-cover"
+                                        class="h-14 w-14 shrink-0 rounded-md object-cover"
                                     />
                                     <span class="flex-1 text-sm font-semibold text-yl-green-deep group-hover:text-yl-green">
                                         {{ other.name }}

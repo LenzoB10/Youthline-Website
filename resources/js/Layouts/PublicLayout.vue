@@ -1,4 +1,5 @@
 <script setup>
+import XLogo from '@/Components/Public/XLogo.vue';
 import { Link, useForm, usePage } from '@inertiajs/vue3';
 import {
     Facebook,
@@ -7,7 +8,6 @@ import {
     MapPin,
     Menu,
     Phone,
-    Twitter,
     X,
 } from 'lucide-vue-next';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
@@ -181,18 +181,21 @@ const isCurrent = (name) => {
         </main>
 
         <!-- Footer -->
-        <footer class="mt-16 bg-yl-green-deep text-white">
+        <footer class="bg-yl-green-deep text-white">
             <div class="yl-container grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-4">
                 <div class="sm:col-span-2 lg:col-span-1">
-                    <div class="flex items-center gap-2.5">
-                        <img
-                            src="/imgs/youthline-logo-sm.png"
-                            alt=""
-                            width="240"
-                            height="160"
-                            loading="lazy"
-                            class="h-12 w-auto object-contain"
-                        />
+                    <div class="flex items-center gap-3">
+                        <!-- White circle so the green/gold logo stands out on the dark footer -->
+                        <span class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-white p-2 shadow-sm">
+                            <img
+                                src="/imgs/youthline-logo-sm.png"
+                                alt=""
+                                width="240"
+                                height="160"
+                                loading="lazy"
+                                class="h-auto w-full object-contain"
+                            />
+                        </span>
                         <span class="text-lg font-bold">{{ site.org_name || 'Youthline' }}</span>
                     </div>
                     <p class="mt-4 text-sm text-white/70">
@@ -227,7 +230,7 @@ const isCurrent = (name) => {
                             class="yl-social yl-social-x bg-white/10 p-2"
                             aria-label="X"
                         >
-                            <Twitter class="h-4 w-4" />
+                            <XLogo class="h-4 w-4" />
                         </a>
                     </div>
                 </div>

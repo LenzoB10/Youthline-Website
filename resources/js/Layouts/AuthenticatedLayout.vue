@@ -1,5 +1,5 @@
 <template>
-    <div class="flex min-h-screen bg-gray-200 text-text-base dark:bg-background-dark dark:text-text-inverted">
+    <div class="app-bg flex min-h-screen font-app text-text-base antialiased dark:text-text-inverted">
         <!-- Sidebar -->
         <Sidebar />
 

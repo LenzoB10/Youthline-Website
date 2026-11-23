@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { Contact, FileText, Handshake, Heart, LayoutGrid, Mail, MessageSquare, Newspaper, Settings, Users } from 'lucide-vue-next';
+import { Building2, Contact, FileText, Handshake, Heart, LayoutGrid, Mail, MessageSquare, Newspaper, Quote, Settings, Users } from 'lucide-vue-next';
 
 defineProps({
     stats: { type: Object, default: () => ({}) },
@@ -13,6 +13,8 @@ const cards = [
     { name: 'Programs', description: 'The six programs shown on the site.', icon: LayoutGrid, route: 'admin.website.programs.index' },
     { name: 'Core Values', description: 'The values on the About page.', icon: Heart, route: 'admin.website.values.index' },
     { name: 'Team', description: 'Leadership team members and photos.', icon: Users, route: 'admin.website.team.index' },
+    { name: 'Testimonials', description: 'Quotes from students, families and sponsors on the home page.', icon: Quote, route: 'admin.website.testimonials.index' },
+    { name: 'Partners', description: 'Logos of organisations that support Youthline.', icon: Building2, route: 'admin.website.partners.index' },
     { name: 'Contact Details', description: 'Phone, email, address and office hours.', icon: Contact, route: 'admin.website.contact.edit' },
     { name: 'News & Stories', description: 'Write, publish and manage posts.', icon: Newspaper, route: 'admin.website.news.index' },
     { name: 'Contact Messages', description: 'Messages from the Contact Us form.', icon: MessageSquare, route: 'admin.website.messages.index' },

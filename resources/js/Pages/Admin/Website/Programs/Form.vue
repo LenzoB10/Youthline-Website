@@ -1,11 +1,12 @@
 <script setup>
+import BackLink from '@/Components/Common/BackLink.vue';
 import InputError from '@/Components/FormElements/InputError.vue';
 import InputLabel from '@/Components/FormElements/InputLabel.vue';
 import TextArea from '@/Components/FormElements/TextArea.vue';
 import TextInput from '@/Components/FormElements/TextInput.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ArrowLeft, ExternalLink } from 'lucide-vue-next';
+import { ExternalLink } from 'lucide-vue-next';
 import { computed, onBeforeUnmount, ref } from 'vue';
 
 const props = defineProps({
@@ -54,9 +55,7 @@ const submit = () => {
     <Head :title="isEdit ? 'Edit program' : 'New program'" />
 
     <AuthenticatedLayout>
-        <Link :href="route('admin.website.programs.index')" class="mb-4 inline-flex items-center gap-1 text-sm text-mustBlue dark:text-text-dark-muted">
-            <ArrowLeft class="h-4 w-4" /> All programs
-        </Link>
+        <BackLink :href="route('admin.website.programs.index')">All programs</BackLink>
         <div class="flex flex-wrap items-center justify-between gap-3">
             <h1 class="page-heading">{{ isEdit ? 'Edit program' : 'New program' }}</h1>
             <a

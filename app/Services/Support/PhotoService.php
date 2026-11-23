@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
- * Home-visit and repair photos: private disk, served only through a
+ * Home-visit and family-support photos: private disk, served only through a
  * permission-checked route (like student documents).
  */
 class PhotoService
@@ -58,7 +58,7 @@ class PhotoService
     }
 
     /**
-     * Remove every photo of an owner (when the visit or repair itself is deleted).
+     * Remove every photo of an owner (when the visit or support entry itself is deleted).
      */
     public function deleteAllFor(Model $owner): void
     {

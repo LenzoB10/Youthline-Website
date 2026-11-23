@@ -1,7 +1,7 @@
 <script setup>
+import BackLink from '@/Components/Common/BackLink.vue';
 import ChangeStatusModal from '@/Components/Students/ChangeStatusModal.vue';
 import ConsentPanel from '@/Components/Students/ConsentPanel.vue';
-import DeleteStudentModal from '@/Components/Students/DeleteStudentModal.vue';
 import DocumentsPanel from '@/Components/Students/DocumentsPanel.vue';
 import EnrollmentModal from '@/Components/Students/EnrollmentModal.vue';
 import FeesPanel from '@/Components/Students/FeesPanel.vue';
@@ -16,7 +16,7 @@ import { date } from '@/Helpers';
 import { can } from '@/Helpers/can';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { ArrowLeft, GraduationCap, Home, Layers, RefreshCw, SquarePen, Trash2 } from 'lucide-vue-next';
+import { GraduationCap, Home, Layers, RefreshCw } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
 const props = defineProps({
@@ -56,7 +56,6 @@ const selectTab = (key) => {
 
 const showStatus = ref(false);
 const showEnrollment = ref(false);
-const showDelete = ref(false);
 
 const currentEnrollment = computed(() => props.enrollments.find((e) => e.is_current_year) ?? null);
 const latestEnrollment = computed(() => props.enrollments[0] ?? null);
@@ -71,9 +70,7 @@ const show = (value) => (value === null || value === undefined || value === '' ?
     <Head :title="student.full_name" />
 
     <AuthenticatedLayout>
-        <Link :href="route('students.index')" class="mb-4 inline-flex items-center gap-1 text-sm text-mustBlue dark:text-text-dark-muted">
-            <ArrowLeft class="h-4 w-4" /> Students
-        </Link>
+        <BackLink :href="route('students.index')">Students</BackLink>
 
         <!-- Header -->
         <div class="card-container mb-4">
@@ -99,15 +96,9 @@ const show = (value) => (value === null || value === undefined || value === '' ?
                     <button v-if="can('change student status')" type="button" class="btn-primary-sm inline-flex items-center gap-1" @click="showStatus = true">
                         <RefreshCw class="h-4 w-4" /> Change status
                     </button>
-                    <Link v-if="can('update student')" :href="route('students.edit', student.id)" class="btn-outline-sm inline-flex items-center gap-1">
-                        <SquarePen class="h-4 w-4" /> Edit
-                    </Link>
-                    <button v-if="can('delete student')" type="button" class="btn-danger-sm inline-flex items-center gap-1" @click="showDelete = true">
-                        <Trash2 class="h-4 w-4" /> Delete
-                    </button>
                 </div>
             </div>
-            <p v-if="student.status === 'applicant'" class="mt-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">
+            <p v-if="student.status === 'applicant'" class="mt-4 rounded-lg bg-yl-gold/10 p-3 text-sm text-amber-800 dark:bg-yl-gold/10 dark:text-yl-gold">
                 Waiting for assessment. After the home visit, use <strong>Change status → Active</strong> to start support.
             </p>
         </div>
@@ -183,7 +174,7 @@ const show = (value) => (value === null || value === undefined || value === '' ?
                         </ul>
                     </div>
                 </template>
-                <p v-else class="text-sm text-text-muted">Not linked to a household yet. Use Edit to link one.</p>
+                <p v-else class="text-sm text-text-muted">Not linked to a household yet.<Link v-if="can('update student')" :href="route('students.edit', student.id)" class="ml-1 text-mustGreen hover:underline">Link one</Link></p>
             </section>
 
             <section class="card-container">
@@ -245,11 +236,11 @@ const show = (value) => (value === null || value === undefined || value === '' ?
                         <tr v-for="row in enrollments" :key="row.id" class="border-b border-mustBorder-light last:border-0 dark:border-mustBorder-dark">
                             <td class="px-3 py-2 font-medium text-mustBlue dark:text-text-inverted">
                                 {{ row.year ?? '—' }}
-                                <span v-if="row.is_current_year" class="ml-1 rounded-full bg-green-100 px-1.5 py-0.5 text-xs text-green-800">Current</span>
+                                <span v-if="row.is_current_year" class="ml-1 rounded-full bg-mustGreen/15 px-1.5 py-0.5 text-xs text-yl-green-deep">Current</span>
                             </td>
                             <td class="px-3 py-2">
                                 {{ row.level_label ?? '—' }}
-                                <span v-if="row.is_repeating" class="ml-1 rounded-full bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800">Repeating</span>
+                                <span v-if="row.is_repeating" class="ml-1 rounded-full bg-yl-gold/15 px-1.5 py-0.5 text-xs text-amber-800">Repeating</span>
                             </td>
                             <td class="px-3 py-2">{{ row.institution ?? '—' }}</td>
                             <td class="px-3 py-2 text-text-muted">{{ row.course ?? '—' }}</td>
@@ -299,11 +290,8 @@ const show = (value) => (value === null || value === undefined || value === '' ?
         <BusinessPanel v-else-if="activeTab === 'business'" :student="student" :businesses="support.businesses" :funding-types="options.fundingTypes" :currency="finance.currency" />
         <CareersPanel
             v-else-if="activeTab === 'careers'"
-            :key="`careers-${support.careers.interests.join('|')}`"
             :student="student"
             :data="support.careers"
-            :application-types="options.applicationTypes"
-            :application-statuses="options.applicationStatuses"
             :outcome-types="options.outcomeTypes"
         />
 
@@ -324,6 +312,5 @@ const show = (value) => (value === null || value === undefined || value === '' ?
             :levels="options.levels"
             @close="showEnrollment = false"
         />
-        <DeleteStudentModal :show="showDelete" :student="student" @close="showDelete = false" />
     </AuthenticatedLayout>
 </template>

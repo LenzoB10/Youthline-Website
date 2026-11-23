@@ -1,8 +1,10 @@
 <?php
 
 use App\Models\CoreValue;
+use App\Models\Partner;
 use App\Models\Program;
 use App\Models\TeamMember;
+use App\Models\Testimonial;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -142,4 +144,66 @@ it('links each program to its public page from the admin list', function () {
     actingAs($this->editor)
         ->get(route('admin.website.programs.index'))
         ->assertInertia(fn ($page) => $page->where('programs.0.slug', 'careers'));
+});
+
+// --- Testimonials -----------------------------------------------------------
+
+it('manages testimonials and shows only published ones on the home page', function () {
+    Storage::fake('public');
+    actingAs($this->outsider)->get(route('admin.website.testimonials.index'))->assertForbidden();
+
+    actingAs($this->editor)->get(route('admin.website.testimonials.create'))->assertOk();
+    actingAs($this->editor)->post(route('admin.website.testimonials.store'), [
+        'name' => 'Grace M.', 'role' => 'Form 4 student', 'quote' => 'Youthline kept me in school.',
+        'is_published' => 1, 'display_order' => 1, 'photo' => UploadedFile::fake()->image('grace.jpg'),
+    ])->assertRedirect(route('admin.website.testimonials.index'));
+    actingAs($this->editor)->post(route('admin.website.testimonials.store'), [
+        'name' => 'Hidden person', 'quote' => 'Not ready yet.', 'is_published' => 0,
+    ])->assertSessionHasNoErrors();
+
+    $grace = Testimonial::query()->where('name', 'Grace M.')->sole();
+    expect($grace->photo)->not->toBeNull();
+
+    $this->get(route('home'))->assertInertia(fn ($page) => $page
+        ->has('testimonials', 1)
+        ->where('testimonials.0.name', 'Grace M.')
+        ->where('testimonials.0.role', 'Form 4 student'));
+
+    actingAs($this->editor)->post(route('admin.website.testimonials.update', $grace), [
+        '_method' => 'put', 'name' => 'Grace M.', 'quote' => 'Updated quote.', 'is_published' => 0,
+    ])->assertSessionHasNoErrors();
+    $this->get(route('home'))->assertInertia(fn ($page) => $page->has('testimonials', 0));
+
+    actingAs($this->editor)->post(route('admin.website.testimonials.store'), ['name' => '', 'quote' => str_repeat('a', 601), 'is_published' => 1])
+        ->assertSessionHasErrors(['name', 'quote']);
+
+    actingAs($this->editor)->delete(route('admin.website.testimonials.destroy', $grace))->assertSessionHas('success');
+    expect(Testimonial::query()->count())->toBe(1);
+});
+
+// --- Partners ---------------------------------------------------------------
+
+it('manages partners and shows only published ones in the home page logo strip', function () {
+    Storage::fake('public');
+    actingAs($this->outsider)->get(route('admin.website.partners.index'))->assertForbidden();
+
+    actingAs($this->editor)->get(route('admin.website.partners.create'))->assertOk();
+    actingAs($this->editor)->post(route('admin.website.partners.store'), [
+        'name' => 'Blantyre Rotary Club', 'website_url' => 'https://example.org', 'is_published' => 1,
+        'display_order' => 1, 'logo' => UploadedFile::fake()->image('logo.png'),
+    ])->assertRedirect(route('admin.website.partners.index'));
+    actingAs($this->editor)->post(route('admin.website.partners.store'), ['name' => 'Not yet agreed', 'is_published' => 0])
+        ->assertSessionHasNoErrors();
+
+    $this->get(route('home'))->assertInertia(fn ($page) => $page
+        ->has('partners', 1)
+        ->where('partners.0.name', 'Blantyre Rotary Club')
+        ->where('partners.0.url', 'https://example.org'));
+
+    actingAs($this->editor)->post(route('admin.website.partners.store'), ['name' => 'Bad link', 'website_url' => 'javascript:alert(1)', 'is_published' => 1])
+        ->assertSessionHasErrors('website_url');
+
+    $rotary = Partner::query()->where('name', 'Blantyre Rotary Club')->sole();
+    actingAs($this->editor)->delete(route('admin.website.partners.destroy', $rotary))->assertSessionHas('success');
+    $this->get(route('home'))->assertInertia(fn ($page) => $page->has('partners', 0));
 });

@@ -25,12 +25,16 @@ watch(
         if (open) {
             form.reset();
             form.clearErrors();
-            form.status = props.transitions[0]?.value ?? '';
+            // Nothing pre-selected: every status is offered, so the choice must be deliberate.
+            form.status = '';
         }
     },
 );
 
 const selected = computed(() => props.transitions.find((t) => t.value === form.status));
+const EXITS = ['graduated', 'dropped_out', 'transferred'];
+// Moving a student who left back to a non-exit status reopens the programs their exit closed.
+const undoingExit = computed(() => EXITS.includes(props.student.status) && form.status && !EXITS.includes(form.status));
 const reasonOptions = computed(() =>
     props.exitReasons.map((reason) => ({ value: reason.name, label: reason.name })),
 );
@@ -52,6 +56,7 @@ const submit = () =>
             <p class="mb-4 text-sm text-text-muted">
                 {{ student.full_name }} is currently <strong>{{ student.status_label }}</strong>.
                 Students are never deleted — their status records where they are.
+                If the status was set by mistake, just choose the correct one.
             </p>
 
             <form class="space-y-4" @submit.prevent="submit">
@@ -72,6 +77,9 @@ const submit = () =>
                         </label>
                     </div>
                     <InputError class="mt-2" :message="form.errors.status" />
+                    <p v-if="undoingExit" class="mt-2 text-xs text-text-muted">
+                        The programs that were closed when they became {{ student.status_label }} will be reopened.
+                    </p>
                 </fieldset>
 
                 <div v-if="selected?.requires_reason" class="grid gap-4 sm:grid-cols-[1fr_11rem]">

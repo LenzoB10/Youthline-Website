@@ -77,10 +77,9 @@ class RolesAndPermissionsSeeder extends Seeder
         foreach ($managerSupportPermissions as $permission) {
             Permission::updateOrCreate(['name' => $permission]);
         }
-        // Admin only: delete support records, approve repair budgets, and read every
+        // Admin only: delete support records, and read every
         // session note (managers see notes per the Settings visibility rule).
         Permission::updateOrCreate(['name' => 'delete support records']);
-        Permission::updateOrCreate(['name' => 'approve repairs']);
         Permission::updateOrCreate(['name' => 'view all session notes']);
 
         // Sponsors & reporting (Phase 5): managers keep sponsors, write progress

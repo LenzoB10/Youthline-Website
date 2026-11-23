@@ -1,4 +1,5 @@
 <script setup>
+import BackLink from '@/Components/Common/BackLink.vue';
 import ConfirmationModal from '@/Components/Common/Modal/ConfirmationModal.vue';
 import Modal from '@/Components/Common/Modal/Modal.vue';
 import ModalHeader from '@/Components/Common/Modal/ModalHeader.vue';
@@ -9,7 +10,7 @@ import TextInput from '@/Components/FormElements/TextInput.vue';
 import { date } from '@/Helpers';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
-import { ArrowLeft, CalendarPlus, Plus, SquarePen, Star, Trash2 } from 'lucide-vue-next';
+import { CalendarPlus, Plus, SquarePen, Star, Trash2 } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 defineProps({
@@ -107,9 +108,7 @@ const destroy = () => {
     <Head title="Academic Calendar" />
 
     <AuthenticatedLayout>
-        <Link :href="route('admin.settings.index')" class="mb-4 inline-flex items-center gap-1 text-sm text-mustBlue dark:text-text-dark-muted">
-            <ArrowLeft class="h-4 w-4" /> Settings
-        </Link>
+        <BackLink :href="route('admin.settings.index')">Settings</BackLink>
         <div class="mb-2 flex flex-wrap items-center justify-between gap-3">
             <h1 class="page-heading !mb-0">Academic Calendar</h1>
             <button type="button" class="btn-primary-sm inline-flex items-center gap-1" @click="openYear()">
@@ -136,7 +135,7 @@ const destroy = () => {
                     <div>
                         <h2 class="flex items-center gap-2 text-lg font-semibold text-mustBlue dark:text-text-inverted">
                             {{ year.name }}
-                            <span v-if="year.is_current" class="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
+                            <span v-if="year.is_current" class="rounded-full bg-mustGreen/15 px-2 py-0.5 text-xs font-medium text-yl-green-deep">
                                 Current year
                             </span>
                         </h2>
@@ -168,7 +167,7 @@ const destroy = () => {
                     <li v-for="term in year.terms" :key="term.id" class="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
                         <div class="text-sm">
                             <span class="font-medium text-mustBlue dark:text-text-inverted">{{ term.name }}</span>
-                            <span v-if="term.is_current" class="ml-2 inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
+                            <span v-if="term.is_current" class="ml-2 inline-flex items-center gap-1 rounded-full bg-mustGreen/15 px-2 py-0.5 text-xs font-medium text-yl-green-deep">
                                 <Star class="h-3 w-3" /> Current term
                             </span>
                             <span class="block text-text-muted">{{ range(term.start_date, term.end_date) }}</span>

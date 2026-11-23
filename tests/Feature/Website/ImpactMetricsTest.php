@@ -5,10 +5,10 @@ use App\Models\AcademicYear;
 use App\Models\AlumniOutcome;
 use App\Models\Business;
 use App\Models\Enrollment;
+use App\Models\FamilySupport;
 use App\Models\HomeVisit;
 use App\Models\Household;
 use App\Models\Program;
-use App\Models\RepairProject;
 use App\Models\Student;
 use App\Services\Website\ImpactMetricsService;
 use Inertia\Testing\AssertableInertia;
@@ -53,13 +53,14 @@ it('counts active students by their current-year level', function () {
         ->and(metricValue('active_university'))->toBe(1);
 });
 
-it('counts families, repairs, businesses, alumni and MSCE from live records', function () {
+it('counts families, family support, businesses, alumni and MSCE from live records', function () {
     $visited = Household::create(['head_name' => 'Visited']);
     HomeVisit::create(['household_id' => $visited->id, 'visit_date' => now()]);
     Household::create(['head_name' => 'Never visited']);
 
-    RepairProject::create(['household_id' => $visited->id, 'status' => 'completed']);
-    RepairProject::create(['household_id' => $visited->id, 'status' => 'planned']);
+    // Two entries for one family count as one family supported.
+    FamilySupport::create(['household_id' => $visited->id, 'given_on' => now(), 'type' => 'food', 'description' => 'Maize']);
+    FamilySupport::create(['household_id' => $visited->id, 'given_on' => now(), 'type' => 'home_repair', 'description' => 'Roof']);
 
     $student = makeStudent('graduated');
     Business::create(['student_id' => $student->id, 'name' => 'Tailoring']);
@@ -67,7 +68,7 @@ it('counts families, repairs, businesses, alumni and MSCE from live records', fu
     AcademicResult::create(['student_id' => $student->id, 'exam_type' => 'msce']);
 
     expect(metricValue('families'))->toBe(1)
-        ->and(metricValue('repairs'))->toBe(1)
+        ->and(metricValue('family_support'))->toBe(1)
         ->and(metricValue('businesses'))->toBe(1)
         ->and(metricValue('alumni_active'))->toBe(1)
         ->and(metricValue('msce'))->toBe(1);

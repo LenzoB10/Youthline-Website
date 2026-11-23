@@ -193,7 +193,6 @@ class StudentController extends Controller
             ],
             'finance' => [
                 'currency' => $settings->currency,
-                'paymentLimit' => $settings->require_payment_approval ? (float) $settings->payment_approval_limit : null,
                 'scholarshipNeedsApproval' => $settings->require_scholarship_approval && ! $student->fees()->approved()->exists(),
                 'gradeDropThreshold' => (float) $settings->grade_drop_threshold,
             ],
@@ -208,7 +207,7 @@ class StudentController extends Controller
                 'terms' => $this->termOptions(),
                 'resultTypes' => ResultType::options(),
                 'paymentMethods' => Payment::METHODS,
-                'transitions' => collect($student->status->allowedTransitions())->map(fn (StudentStatus $s) => [
+                'transitions' => collect($student->availableStatuses())->map(fn (StudentStatus $s) => [
                     'value' => $s->value, 'label' => $s->label(), 'description' => $s->description(), 'requires_reason' => $s->requiresReason(),
                 ])->values(),
                 'exitReasons' => ExitReason::query()->active()->get(['name', 'description']),
@@ -312,7 +311,6 @@ class StudentController extends Controller
             'amount_owed' => (float) $fee->amount_owed,
             'youthline_share' => (float) $fee->youthline_share,
             'paid' => $fee->paidTotal(),
-            'pending' => $fee->pendingTotal(),
             'balance' => $fee->balance(),
             'remaining' => $fee->remainingToRecord(),
             'state' => $fee->paymentState(),

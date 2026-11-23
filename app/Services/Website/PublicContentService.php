@@ -5,8 +5,10 @@ namespace App\Services\Website;
 use App\Models\CoreValue;
 use App\Models\NewsPost;
 use App\Models\Page;
+use App\Models\Partner;
 use App\Models\Program;
 use App\Models\TeamMember;
+use App\Models\Testimonial;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
@@ -41,7 +43,46 @@ class PublicContentService
             'programs' => $this->programs(),
             'values' => $this->values(),
             'news' => $this->newsList(4),
+            'testimonials' => $this->testimonials(),
+            'partners' => $this->partners(),
         ];
+    }
+
+    /**
+     * Published partners for the logo strip on the home page.
+     *
+     * @return Collection<int, array<string, mixed>>
+     */
+    protected function partners(): Collection
+    {
+        return Partner::query()
+            ->forDisplay()
+            ->get(['id', 'name', 'logo', 'website_url'])
+            ->map(fn (Partner $p): array => [
+                'id' => $p->id,
+                'name' => $p->name,
+                'logo' => $p->logo,
+                'url' => $p->website_url,
+            ]);
+    }
+
+    /**
+     * Published testimonials for the home page.
+     *
+     * @return Collection<int, array<string, mixed>>
+     */
+    protected function testimonials(): Collection
+    {
+        return Testimonial::query()
+            ->forDisplay()
+            ->get(['id', 'name', 'role', 'quote', 'photo'])
+            ->map(fn (Testimonial $t): array => [
+                'id' => $t->id,
+                'name' => $t->name,
+                'role' => $t->role,
+                'quote' => $t->quote,
+                'photo' => $t->photo,
+            ]);
     }
 
     /**

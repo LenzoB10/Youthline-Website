@@ -122,6 +122,27 @@ it('gives the Admin an organisation overview with spend per program', function (
         ->assertInertia(fn (AssertableInertia $page) => $page->where('overview', null));
 });
 
+it('shows 12 months of support given to the Admin and the Manager, but not to others', function () {
+    $fee = makeFee($this->student, $this->term, 90000);
+    Payment::create(['fee_id' => $fee->id, 'amount' => 25000, 'status' => PaymentStatus::Paid, 'paid_on' => now()->startOfMonth()]);
+    Payment::create(['fee_id' => $fee->id, 'amount' => 10000, 'status' => PaymentStatus::Paid, 'paid_on' => now()->subMonthNoOverflow()->startOfMonth()]);
+    Payment::create(['fee_id' => $fee->id, 'amount' => 99000, 'status' => PaymentStatus::Paid, 'paid_on' => now()->subMonths(13)]);
+
+    $months = app(OrganisationOverviewService::class)->monthlySupport(12);
+    expect($months)->toHaveCount(12)
+        ->and($months[11]['month'])->toBe(now()->format('Y-m'))
+        ->and($months[11]['fees'])->toBe(25000.0)
+        ->and($months[10]['fees'])->toBe(10000.0)
+        ->and(collect($months)->sum('fees'))->toBe(35000.0); // older than 12 months is left out
+
+    foreach ([$this->admin, $this->manager] as $user) {
+        actingAs($user)->get(route('dashboard'))
+            ->assertInertia(fn (AssertableInertia $page) => $page->has('trend', 12));
+    }
+    actingAs($this->outsider)->get(route('dashboard'))
+        ->assertInertia(fn (AssertableInertia $page) => $page->where('trend', null));
+});
+
 // --- Reminders engine --------------------------------------------------------
 
 it('sends each person one daily digest of what is due, only for their own areas', function () {

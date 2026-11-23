@@ -75,7 +75,6 @@
                                 $student['support']['basic_needs'] > 0 ? $report['currency'].' '.number_format($student['support']['basic_needs'], 2).' for basic needs' : null,
                                 $student['support']['sessions'] ? $student['support']['sessions'].' mentorship '.($student['support']['sessions'] === 1 ? 'session' : 'sessions') : null,
                                 $student['support']['businesses'] ? 'Business: '.implode(', ', $student['support']['businesses']) : null,
-                                $student['support']['accepted'] ? 'Accepted at '.implode(', ', $student['support']['accepted']) : null,
                             ]);
                         @endphp
                         {{ $support ? implode(' · ', $support) : '—' }}

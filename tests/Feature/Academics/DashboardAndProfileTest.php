@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\FeeApproval;
 use App\Enums\PaymentStatus;
 use App\Models\AcademicResult;
 use App\Models\Payment;
@@ -19,7 +20,7 @@ beforeEach(function () {
 
 it('shows each person only the dashboard blocks they can act on', function () {
     $fee = makeFee($this->student, $this->t1, 900000);
-    Payment::create(['fee_id' => $fee->id, 'amount' => 600000, 'status' => PaymentStatus::PendingApproval]);
+    makeFee(makeLearner(attributes: ['first_name' => 'Kondwani', 'status' => 'applicant']), $this->t2, 45000, ['approval_status' => FeeApproval::Pending]);
     AcademicResult::create(['student_id' => $this->student->id, 'term_id' => $this->t1->id, 'exam_type' => 'term', 'average' => 75]);
     AcademicResult::create(['student_id' => $this->student->id, 'term_id' => $this->t2->id, 'exam_type' => 'term', 'average' => 55]);
 
@@ -28,7 +29,7 @@ it('shows each person only the dashboard blocks they can act on', function () {
             ->component('Dashboard')
             ->where('students.active', 1)
             ->where('fees.outstanding', 900000)
-            ->where('approvals.payments', 1)
+            ->where('approvals.scholarships', 1)
             ->where('gradeDrops.0.student', 'Thandiwe Banda')
             ->where('gradeDrops.0.change', -20)
         );

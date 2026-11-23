@@ -72,7 +72,7 @@ const changeText = (change) => `${change > 0 ? '+' : ''}${Number(change).toLocal
                         v-for="row in results"
                         :key="row.id"
                         class="border-b border-mustBorder-light align-top last:border-0 dark:border-mustBorder-dark"
-                        :class="{ 'bg-red-50/60 dark:bg-red-500/5': row.is_drop }"
+                        :class="{ 'bg-gray-100 dark:bg-white/5': row.is_drop }"
                     >
                         <td class="px-3 py-2 font-medium text-mustBlue dark:text-text-inverted">
                             {{ row.term || '—' }}
@@ -88,7 +88,7 @@ const changeText = (change) => `${change > 0 ? '+' : ''}${Number(change).toLocal
                             <span
                                 v-else
                                 class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
-                                :class="row.is_drop ? 'bg-red-100 text-red-800' : row.change < 0 ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'"
+                                :class="row.is_drop ? 'bg-gray-700 text-white dark:bg-gray-300 dark:text-gray-900' : row.change < 0 ? 'bg-yl-gold/15 text-amber-800 dark:text-yl-gold' : 'bg-mustGreen/15 text-yl-green-deep dark:text-accent-light'"
                             >
                                 <component :is="row.change < 0 ? TrendingDown : TrendingUp" class="h-3 w-3" />
                                 {{ changeText(row.change) }}

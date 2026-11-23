@@ -1,11 +1,11 @@
 <template>
     <div>
         <!-- Mobile overlay -->
-        <div v-if="sidebar.isMobile && sidebar.isMobileSidebarOpen" class="fixed inset-0 z-20 bg-black/50 md:hidden"
+        <div v-if="sidebar.isMobile && sidebar.isMobileSidebarOpen" class="fixed inset-0 z-20 bg-gray-900/40 md:hidden"
             @click="sidebar.closeMobile"></div>
 
         <aside
-            class="fixed z-30 flex h-full w-64 flex-col bg-mustBlue shadow-lg transition-all duration-300 dark:bg-background-dark-soft"
+            class="fixed left-0 top-0 z-30 flex h-full w-64 flex-col border-r border-[#e6e8ec] bg-white transition-all duration-300 dark:border-white/10 dark:bg-[#16191d]"
             :class="[
                 sidebar.isMobile
                     ? sidebar.isMobileSidebarOpen
@@ -16,62 +16,97 @@
                         : '-translate-x-full',
                 'md:transition-transform md:duration-300',
             ]">
-            <a href="/" class="flex flex-shrink-0 items-center gap-2.5 px-6 py-4 text-2xl font-bold text-text-inverted">
-                <img src="/imgs/youthline-logo-sm.png" alt="" width="240" height="160" class="h-10 w-auto object-contain" />
-                <span>Youthline</span>
+            <!-- Brand -->
+            <a href="/" class="mx-3 mt-3 flex flex-shrink-0 items-center gap-3 rounded-[10px] px-3 py-3 transition hover:bg-gray-50 dark:hover:bg-white/5">
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm ring-1 ring-gray-200 dark:bg-white/10 dark:ring-white/10">
+                    <img src="/imgs/youthline-logo-sm.png" alt="" width="240" height="160" class="h-7 w-auto object-contain" />
+                </span>
+                <span class="min-w-0 leading-tight">
+                    <span class="block text-[17px] font-bold tracking-tight text-mustBlue dark:text-text-inverted">Youthline</span>
+                    <span class="block text-[11px] font-medium text-text-muted dark:text-text-dark-muted">Management system</span>
+                </span>
             </a>
-            <nav class="flex-grow overflow-y-auto px-3 pb-4">
-                <ul class="space-y-2">
-                    <li v-for="item in filteredMenuItems" :key="item.name">
-                        <div v-if="item.children && item.children.length">
-                            <button @click="toggleSubMenu(item)"
-                                class="flex w-full items-center justify-between rounded-lg p-3 text-text-inverted transition hover:bg-background-soft hover:text-text-muted dark:text-text-dark-muted dark:hover:bg-accent/10"
-                                :class="{
-                                    'bg-mustGreen text-text-inverted dark:bg-accent/10 dark:text-text-inverted':
-                                        item.isCurrent,
-                                }">
-                                <div class="flex items-center">
-                                    <component :is="item.icon" class="mr-3 h-5 w-5" />
-                                    {{ item.name }}
-                                </div>
-                                <ChevronDown class="h-4 w-4 transform transition-transform duration-200" :class="{
-                                    'rotate-180': item.isExpanded,
-                                }" />
-                            </button>
-                            <transition enter-active-class="transition-all duration-200 ease-out"
-                                enter-from-class="opacity-0 max-h-0" enter-to-class="opacity-100 max-h-96"
-                                leave-active-class="transition-all duration-150 ease-in"
-                                leave-from-class="opacity-100 max-h-96" leave-to-class="opacity-0 max-h-0">
-                                <ul v-if="item.isExpanded" class="ml-6 space-y-1 overflow-hidden">
-                                    <li v-for="child in item.children" :key="child.name">
-                                        <Link :href="child.routeLink
-                                            ? route(child.routeLink)
-                                            : '#'
-                                            "
-                                            class="flex items-center rounded-lg px-3 py-2 text-sm text-text-inverted transition hover:bg-background-soft hover:text-text-muted dark:text-text-dark-muted dark:hover:bg-accent/10"
-                                            :class="{
-                                                'bg-mustGreen text-text-inverted dark:bg-accent/10 dark:text-text-inverted':
-                                                    child.isCurrent,
-                                            }">
-                                        <component :is="child.icon" class="mr-3 h-4 w-4" />
+
+            <div class="mx-6 my-2 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent dark:via-white/10"></div>
+
+            <nav class="no-scrollbar flex-grow overflow-y-auto px-3 pb-3" aria-label="Main">
+                <template v-for="(item, index) in filteredMenuItems" :key="item.name">
+                    <p v-if="index === 0 || filteredMenuItems[index - 1].section !== item.section"
+                        class="mb-1.5 px-3 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-gray-400 dark:text-gray-500"
+                        :class="index === 0 ? 'mt-1' : 'mt-5'">
+                        {{ item.section }}
+                    </p>
+
+                    <div v-if="item.children && item.children.length" class="mb-0.5">
+                        <button type="button" @click="toggleSubMenu(item)" :aria-expanded="item.isExpanded"
+                            class="group flex w-full items-center justify-between rounded-[10px] px-3 py-2.5 text-[14px] font-medium transition"
+                            :class="item.isCurrent
+                                ? 'text-mustGreen dark:text-accent-light'
+                                : 'text-gray-600 hover:bg-gray-100 hover:text-mustBlue dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white'">
+                            <span class="flex items-center">
+                                <component :is="item.icon" class="mr-3 h-[18px] w-[18px]"
+                                    :class="item.isCurrent ? 'text-mustGreen dark:text-accent-light' : 'text-gray-400 group-hover:text-mustGreen'" />
+                                {{ item.name }}
+                            </span>
+                            <ChevronDown class="h-4 w-4 text-gray-400 transition-transform duration-200" :class="{ 'rotate-180': item.isExpanded }" />
+                        </button>
+                        <transition enter-active-class="transition-all duration-200 ease-out"
+                            enter-from-class="opacity-0 max-h-0" enter-to-class="opacity-100 max-h-[40rem]"
+                            leave-active-class="transition-all duration-150 ease-in"
+                            leave-from-class="opacity-100 max-h-[40rem]" leave-to-class="opacity-0 max-h-0">
+                            <ul v-if="item.isExpanded" class="my-1 ml-[21px] space-y-0.5 overflow-hidden border-l border-gray-300/70 pl-3 dark:border-white/10">
+                                <li v-for="child in item.children" :key="child.name">
+                                    <Link :href="child.routeLink ? route(child.routeLink) : '#'"
+                                        class="relative flex items-center rounded-md px-3 py-2 text-[13px] transition"
+                                        :class="child.isCurrent
+                                            ? 'bg-mustGreen/10 font-semibold text-mustGreen dark:bg-white/10 dark:text-accent-light'
+                                            : 'text-gray-500 hover:bg-gray-100 hover:text-mustBlue dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white'">
+                                        <span v-if="child.isCurrent" class="absolute -left-[13px] top-1/2 h-5 w-[2px] -translate-y-1/2 rounded-full bg-mustGreen"></span>
                                         {{ child.name }}
-                                        </Link>
-                                    </li>
-                                </ul>
-                            </transition>
-                        </div>
-                        <Link v-else :href="item.routeLink ? route(item.routeLink) : '#'"
-                            class="flex items-center rounded-lg p-3 text-text-inverted transition hover:bg-background-soft hover:text-text-muted dark:text-text-dark-muted dark:hover:bg-accent/10"
-                            :class="{
-                                'bg-mustGreen text-text-inverted dark:bg-accent/10 dark:text-text-inverted':
-                                    item.isCurrent,
-                            }">
-                        <component :is="item.icon" class="mr-3 h-5 w-5" />
+                                    </Link>
+                                </li>
+                            </ul>
+                        </transition>
+                    </div>
+
+                    <Link v-else :href="item.routeLink ? route(item.routeLink) : '#'"
+                        class="group mb-0.5 flex items-center rounded-[10px] px-3 py-2.5 text-[14px] font-medium transition"
+                        :class="item.isCurrent
+                            ? 'bg-mustGreen text-white shadow-[0_8px_20px_-8px_rgba(28,125,60,0.65)]'
+                            : 'text-gray-600 hover:bg-gray-100 hover:text-mustBlue dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white'">
+                        <component :is="item.icon" class="mr-3 h-[18px] w-[18px]"
+                            :class="item.isCurrent ? 'text-white' : 'text-gray-400 group-hover:text-mustGreen'" />
                         {{ item.name }}
-                        </Link>
-                    </li>
-                </ul>
+                    </Link>
+                </template>
             </nav>
+
+            <!-- Signed-in user: opens the same menu as the top-bar avatar -->
+            <div v-if="user" class="relative m-3 mt-0" v-click-outside="() => (userMenuOpen = false)">
+                <Transition
+                    enter-active-class="transition duration-150 ease-out"
+                    enter-from-class="translate-y-1 opacity-0"
+                    leave-active-class="transition duration-100 ease-in"
+                    leave-to-class="translate-y-1 opacity-0"
+                >
+                    <div v-if="userMenuOpen" class="absolute inset-x-0 bottom-full z-40 mb-2">
+                        <ProfileMenu />
+                    </div>
+                </Transition>
+                <button type="button" :aria-expanded="userMenuOpen" aria-haspopup="menu"
+                    class="flex w-full items-center gap-3 rounded-[10px] bg-gray-50 p-2.5 text-left ring-1 ring-gray-200 transition hover:bg-gray-100 dark:bg-white/5 dark:ring-white/10 dark:hover:bg-white/10"
+                    :class="{ '!ring-mustGreen': userMenuOpen }"
+                    @click="userMenuOpen = !userMenuOpen">
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-mustGreen to-yl-green-deep text-xs font-bold text-white">
+                        {{ initials }}
+                    </span>
+                    <span class="min-w-0 flex-1 leading-tight">
+                        <span class="block truncate text-sm font-semibold text-mustBlue dark:text-text-inverted">{{ user.name }}</span>
+                        <span class="block truncate text-[11px] text-text-muted dark:text-text-dark-muted">{{ user.email }}</span>
+                    </span>
+                    <ChevronsUpDown class="h-4 w-4 shrink-0 text-gray-400" />
+                </button>
+            </div>
         </aside>
     </div>
 </template>
@@ -82,10 +117,10 @@ import {
     Home,
     Settings,
     ChevronDown,
+    ChevronsUpDown,
     User,
     Shield,
     Activity,
-    BellIcon,
     DatabaseBackup,
     Globe,
     FileText,
@@ -104,24 +139,32 @@ import {
     DoorOpen,
     ShieldCheck,
     GraduationCap,
-    UserPlus,
-    ArrowUpCircle,
     Wallet,
     HandCoins,
     ClipboardCheck,
     LifeBuoy,
     MessagesSquare,
-    Hammer,
+    HandHeart,
     Store,
     HeartHandshake,
     FileBarChart,
+    Quote,
+    Building2,
 } from "lucide-vue-next";
 
 import { useSidebarStore } from "@/Stores/sidebar.js";
 import { Link } from "@inertiajs/vue3";
+import ProfileMenu from "@/Components/Layouts/ProfileMenu.vue";
 import { usePage } from "@inertiajs/vue3";
 
 const { url: currentUrl } = usePage();
+
+const user = computed(() => usePage().props.auth?.user ?? null);
+const userMenuOpen = ref(false);
+const initials = computed(() => (user.value?.name ?? '?').split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase());
+
+// Menu sections, in the order they appear.
+const SECTION_ORDER = ["Overview", "Programs", "Finance & reports", "Administration"];
 
 const sidebar = useSidebarStore();
 
@@ -162,6 +205,7 @@ const hasPermission = (permission) => {
 const menuItems = ref([
     {
         name: "Dashboard",
+        section: "Overview",
         icon: Home,
         isCurrent: currentUrl === "/" || currentUrl.startsWith("/dashboard"),
         routeLink: 'dashboard',
@@ -169,14 +213,8 @@ const menuItems = ref([
         permission: null,
     },
     {
-        name: "Notifications",
-        icon: BellIcon,
-        routeLink: 'notifications.index',
-        isCurrent: currentUrl.startsWith("/notifications"),
-        permission: null,
-    },
-    {
         name: "Website",
+        section: "Administration",
         icon: Globe,
         permission: "manage website content",
         isCurrent: currentUrl.startsWith("/website"),
@@ -225,6 +263,20 @@ const menuItems = ref([
                 permission: "manage website content",
             },
             {
+                name: "Testimonials",
+                icon: Quote,
+                routeLink: 'admin.website.testimonials.index',
+                isCurrent: currentUrl.startsWith("/website/testimonials"),
+                permission: "manage website content",
+            },
+            {
+                name: "Partners",
+                icon: Building2,
+                routeLink: 'admin.website.partners.index',
+                isCurrent: currentUrl.startsWith("/website/partners"),
+                permission: "manage website content",
+            },
+            {
                 name: "Contact Details",
                 icon: Contact,
                 routeLink: 'admin.website.contact.edit',
@@ -263,36 +315,16 @@ const menuItems = ref([
     },
     {
         name: "Students",
+        section: "Programs",
         icon: GraduationCap,
-        permission: "list students",
+        routeLink: 'students.index',
+        // Highlighted on every student page: the list, profiles, add/edit and promotion.
         isCurrent: currentUrl.startsWith("/students"),
-        isExpanded: false,
-        children: [
-            {
-                name: "All students",
-                icon: Users,
-                routeLink: 'students.index',
-                isCurrent: currentUrl === "/students" || /^\/students\/\d+/.test(currentUrl) || currentUrl.startsWith("/students?"),
-                permission: "list students",
-            },
-            {
-                name: "Add student",
-                icon: UserPlus,
-                routeLink: 'students.create',
-                isCurrent: currentUrl.startsWith("/students/create"),
-                permission: "add student",
-            },
-            {
-                name: "Promote students",
-                icon: ArrowUpCircle,
-                routeLink: 'students.promote.index',
-                isCurrent: currentUrl.startsWith("/students/promote"),
-                permission: "change student status",
-            },
-        ],
+        permission: "list students",
     },
     {
         name: "Support",
+        section: "Programs",
         icon: LifeBuoy,
         permission: ["manage basic needs", "manage mentorship", "manage home visits", "manage businesses"],
         isCurrent: currentUrl.startsWith("/support"),
@@ -313,8 +345,8 @@ const menuItems = ref([
                 permission: "manage mentorship",
             },
             {
-                name: "Families & repairs",
-                icon: Hammer,
+                name: "Families",
+                icon: HandHeart,
                 routeLink: 'support.families',
                 isCurrent: currentUrl.startsWith("/support/families"),
                 permission: "manage home visits",
@@ -330,6 +362,7 @@ const menuItems = ref([
     },
     {
         name: "Sponsors",
+        section: "Programs",
         icon: HeartHandshake,
         routeLink: 'sponsors.index',
         isCurrent: currentUrl.startsWith("/sponsors"),
@@ -337,6 +370,7 @@ const menuItems = ref([
     },
     {
         name: "Reports",
+        section: "Finance & reports",
         icon: FileBarChart,
         routeLink: 'reports.index',
         isCurrent: currentUrl.startsWith("/reports"),
@@ -344,8 +378,9 @@ const menuItems = ref([
     },
     {
         name: "Finance",
+        section: "Finance & reports",
         icon: Wallet,
-        permission: ["manage fees", "approve payments", "approve repairs"],
+        permission: ["manage fees", "approve payments"],
         isCurrent: currentUrl.startsWith("/finance"),
         isExpanded: false,
         children: [
@@ -367,6 +402,7 @@ const menuItems = ref([
     },
     {
         name: "Settings",
+        section: "Administration",
         icon: SlidersHorizontal,
         permission: "update settings",
         isCurrent: currentUrl.startsWith("/settings"),
@@ -418,6 +454,7 @@ const menuItems = ref([
     },
     {
         name: "System",
+        section: "Administration",
         icon: Settings,
         permission: "list users",
         isCurrent:
@@ -477,7 +514,8 @@ const toggleSubMenu = (item) => {
 const expandedStates = ref({});
 
 const filteredMenuItems = computed(() => {
-    return menuItems.value
+    return [...menuItems.value]
+        .sort((a, b) => SECTION_ORDER.indexOf(a.section) - SECTION_ORDER.indexOf(b.section))
         .filter((item) => {
             if (!hasPermission(item.permission)) {
                 return false;
@@ -497,7 +535,7 @@ const filteredMenuItems = computed(() => {
             const newItem = { ...item };
 
             if (!(item.name in expandedStates.value)) {
-                expandedStates.value[item.name] = item.isExpanded || false;
+                expandedStates.value[item.name] = item.isExpanded || Boolean(item.children && item.isCurrent);
             }
 
             newItem.isExpanded = expandedStates.value[item.name];

@@ -19,11 +19,7 @@ class SystemSetting extends Model
     protected function casts(): array
     {
         return [
-            'require_payment_approval' => 'boolean',
-            'payment_approval_limit' => 'decimal:2',
             'require_scholarship_approval' => 'boolean',
-            'require_repair_approval' => 'boolean',
-            'repair_approval_limit' => 'decimal:2',
             'grade_drop_threshold' => 'decimal:2',
             'mentorship_overdue_days' => 'integer',
             'home_visit_interval_months' => 'integer',

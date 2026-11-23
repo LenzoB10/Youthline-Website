@@ -1,4 +1,5 @@
 <script setup>
+import BackLink from '@/Components/Common/BackLink.vue';
 import InputError from '@/Components/FormElements/InputError.vue';
 import InputLabel from '@/Components/FormElements/InputLabel.vue';
 import SelectInput from '@/Components/FormElements/SelectInput.vue';
@@ -6,7 +7,6 @@ import TextArea from '@/Components/FormElements/TextArea.vue';
 import TextInput from '@/Components/FormElements/TextInput.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ArrowLeft } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 const props = defineProps({
@@ -52,9 +52,7 @@ const submit = () => {
     <Head :title="isEdit ? 'Edit post' : 'New post'" />
 
     <AuthenticatedLayout>
-        <Link :href="route('admin.website.news.index')" class="mb-4 inline-flex items-center gap-1 text-sm text-mustBlue dark:text-text-dark-muted">
-            <ArrowLeft class="h-4 w-4" /> All posts
-        </Link>
+        <BackLink :href="route('admin.website.news.index')">All posts</BackLink>
         <h1 class="page-heading">{{ isEdit ? 'Edit post' : 'New post' }}</h1>
 
         <form class="card-container max-w-3xl" @submit.prevent="submit">

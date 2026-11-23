@@ -1,9 +1,10 @@
 <script setup>
+import BackLink from '@/Components/Common/BackLink.vue';
 import ConfirmationModal from '@/Components/Common/Modal/ConfirmationModal.vue';
 import InputError from '@/Components/FormElements/InputError.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ArrowLeft, ArrowRight, CheckCircle2, RotateCcw, Search } from 'lucide-vue-next';
+import { ArrowRight, CheckCircle2, Eye, RotateCcw, Search } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
 const props = defineProps({
@@ -96,9 +97,7 @@ const segment = (row, value) =>
     <Head title="Promote students" />
 
     <AuthenticatedLayout>
-        <Link :href="route('students.index')" class="mb-4 inline-flex items-center gap-1 text-sm text-mustBlue dark:text-text-dark-muted">
-            <ArrowLeft class="h-4 w-4" /> Students
-        </Link>
+        <BackLink :href="route('students.index')">Students</BackLink>
         <h1 class="page-heading">Promote students</h1>
 
         <div v-if="!year" class="card-container py-10 text-center text-sm text-text-muted">
@@ -138,7 +137,7 @@ const segment = (row, value) =>
                     <div v-if="selected.size" class="ml-auto flex flex-wrap items-center gap-2 rounded-lg bg-mustGreen/5 px-3 py-2 text-sm">
                         <span class="font-medium text-mustBlue dark:text-text-inverted">{{ selected.size }} selected</span>
                         <button type="button" class="btn-primary-sm" :disabled="selectedCantPromote === selected.size" @click="applyToSelected('promote')">Promote</button>
-                        <button type="button" class="rounded-md bg-amber-500 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-white hover:bg-amber-600" @click="applyToSelected('repeat')">Repeat</button>
+                        <button type="button" class="btn-base border border-yl-gold bg-yl-gold px-3 py-1.5 text-xs text-yl-forest hover:bg-yl-gold-soft focus-visible:ring-yl-gold/30" @click="applyToSelected('repeat')">Repeat</button>
                         <button type="button" class="btn-outline-sm" @click="applyToSelected(null)">Not now</button>
                         <span v-if="selectedCantPromote" class="w-full text-xs text-text-muted">
                             {{ selectedCantPromote }} selected {{ selectedCantPromote === 1 ? 'is' : 'are' }} at the top of a stage and can only repeat — they're skipped by “Promote”.
@@ -157,11 +156,12 @@ const segment = (row, value) =>
                                 <th class="px-3 py-2">In {{ year }}</th>
                                 <th class="px-3 py-2">School / university</th>
                                 <th class="px-3 py-2">Decision</th>
+                                <th class="px-3 py-2 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-if="!shown.length">
-                                <td colspan="5" class="px-3 py-6 text-center text-text-muted">No students match.</td>
+                                <td colspan="6" class="px-3 py-6 text-center text-text-muted">No students match.</td>
                             </tr>
                             <tr
                                 v-for="row in shown"
@@ -176,7 +176,7 @@ const segment = (row, value) =>
                                     <input type="checkbox" class="checkbox-input" :checked="isSelected(row.student_id)" :aria-label="`Select ${row.name}`" @change="toggleSelected(row.student_id)" />
                                 </td>
                                 <td class="px-3 py-2">
-                                    <Link :href="route('students.show', row.student_id)" class="font-medium text-mustBlue hover:underline dark:text-text-inverted">{{ row.name }}</Link>
+                                    <span class="font-medium text-mustBlue dark:text-text-inverted">{{ row.name }}</span>
                                     <span v-if="row.from_year" class="block text-xs text-text-muted">{{ row.from_label }} in {{ row.from_year }}</span>
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-2">
@@ -228,6 +228,11 @@ const segment = (row, value) =>
                                             Not now
                                         </button>
                                     </div>
+                                </td>
+                                <td class="px-3 py-2 text-right">
+                                    <Link :href="route('students.show', row.student_id)" class="action-icon inline-flex" :aria-label="`View ${row.name}`" title="View">
+                                        <Eye class="h-[19px] w-[19px]" />
+                                    </Link>
                                 </td>
                             </tr>
                         </tbody>

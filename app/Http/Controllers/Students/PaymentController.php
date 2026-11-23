@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Students;
 
-use App\Enums\PaymentStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ReasonRequest;
 use App\Http\Requests\Students\PaymentRequest;
@@ -23,11 +22,9 @@ class PaymentController extends Controller
 
     public function store(PaymentRequest $request, Student $student, Fee $fee): RedirectResponse
     {
-        $payment = $this->payments->record($fee, $request->validated(), $request->file('receipt'), $request->user());
+        $this->payments->record($fee, $request->validated(), $request->file('receipt'), $request->user());
 
-        return back()->with('success', $payment->status === PaymentStatus::PendingApproval
-            ? 'Payment saved. It is over the approval limit, so it waits for an Admin before it counts.'
-            : 'Payment recorded.');
+        return back()->with('success', 'Payment recorded.');
     }
 
     public function markError(ReasonRequest $request, Student $student, Fee $fee, Payment $payment): RedirectResponse

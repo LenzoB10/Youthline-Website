@@ -223,7 +223,7 @@ const closeModal = () => {
                         <button
                             v-can="'see audit log details'"
                             @click="openLogModal(item)"
-                            class="mr-3 text-blue-600 hover:text-blue-900"
+                            class="mr-3 text-mustGreen hover:text-yl-green-dark"
                         >
                             Show
                         </button>

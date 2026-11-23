@@ -58,7 +58,7 @@ const featuredEyebrow = computed(() => {
                 <!-- Keyed so the text animates in again when the category changes -->
                 <div :key="featured.id" class="yl-enter max-w-3xl">
                     <p class="text-sm font-semibold uppercase tracking-wider text-yl-gold">{{ featuredEyebrow }}</p>
-                    <p class="mt-4 inline-flex bg-yl-gold px-3 py-1 text-sm font-medium text-yl-forest">
+                    <p class="mt-4 inline-flex rounded-md bg-yl-gold px-3 py-1 text-sm font-medium text-yl-forest">
                         <time :datetime="featured.published_at">{{ featured.published_long }}</time>
                         <span class="mx-2" aria-hidden="true">|</span>
                         {{ featured.reading_minutes }} {{ featured.reading_minutes === 1 ? 'minute' : 'minutes' }}
@@ -88,10 +88,10 @@ const featuredEyebrow = computed(() => {
                     <div v-if="others.length" :key="activeCategory ?? 'all'" v-reveal.stagger="120" class="grid gap-x-6 gap-y-12 sm:grid-cols-2">
                         <NewsCard v-for="post in others" :key="post.id" :post="post" />
                     </div>
-                    <div v-else-if="featured" class="border border-dashed border-gray-200 py-16 text-center">
+                    <div v-else-if="featured" class="rounded-md border border-dashed border-gray-200 py-16 text-center">
                         <p class="text-yl-ink/60">That's the only story here so far. More are on the way.</p>
                     </div>
-                    <div v-else class="border border-dashed border-gray-200 py-20 text-center">
+                    <div v-else class="rounded-md border border-dashed border-gray-200 py-20 text-center">
                         <p class="text-yl-ink/60">
                             {{ activeLabel ? 'Nothing has been published in this category yet.' : 'No stories have been published yet. Please check back soon.' }}
                         </p>
@@ -99,7 +99,7 @@ const featuredEyebrow = computed(() => {
                 </div>
 
                 <!-- Categories -->
-                <aside v-reveal:right class="border border-gray-100 bg-white p-6 shadow-sm lg:sticky lg:top-24">
+                <aside v-reveal:right class="rounded-md border border-gray-100 bg-white p-6 shadow-sm lg:sticky lg:top-24">
                     <h2 class="text-lg font-bold text-yl-green-deep">Categories</h2>
                     <nav class="mt-4" aria-label="News categories">
                         <ul class="divide-y divide-gray-100">

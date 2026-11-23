@@ -2,7 +2,6 @@
 
 namespace App\Services\Sponsors;
 
-use App\Enums\ApplicationStatus;
 use App\Enums\EducationLevel;
 use App\Models\AcademicResult;
 use App\Models\AcademicYear;
@@ -95,8 +94,6 @@ class SponsorReportService
                 'sessions' => $student->mentorshipSessions()->where('session_date', '>=', $yearStart)->count(),
                 'businesses' => $student->businesses()->get()
                     ->map(fn ($b) => $b->name.($b->is_running ? ' (running)' : ''))->all(),
-                'accepted' => $student->applications()->where('status', ApplicationStatus::Accepted->value)
-                    ->pluck('organisation')->all(),
             ],
             'update' => $sponsorship->progress_update,
             'update_on' => $sponsorship->progress_update_on?->toDateString(),

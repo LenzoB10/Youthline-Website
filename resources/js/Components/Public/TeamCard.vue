@@ -16,7 +16,7 @@ const initials = computed(() =>
 </script>
 
 <template>
-    <article class="flex h-full flex-col bg-white p-7 shadow-sm transition hover:shadow-md">
+    <article class="flex h-full flex-col rounded-md bg-white p-7 shadow-sm transition hover:shadow-md">
         <p v-if="member.bio" class="flex-1 leading-relaxed text-yl-ink/70">{{ member.bio }}</p>
         <div class="flex items-center gap-4" :class="{ 'mt-6 border-t border-gray-100 pt-6': member.bio }">
             <img
@@ -24,11 +24,11 @@ const initials = computed(() =>
                 :src="member.photo"
                 :alt="member.name"
                 loading="lazy"
-                class="h-14 w-14 shrink-0 object-cover"
+                class="h-14 w-14 shrink-0 rounded-md object-cover"
             />
             <span
                 v-else
-                class="flex h-14 w-14 shrink-0 items-center justify-center bg-yl-green/10 text-lg font-bold text-yl-green"
+                class="flex h-14 w-14 shrink-0 items-center justify-center rounded-md bg-yl-green/10 text-lg font-bold text-yl-green"
                 aria-hidden="true"
             >
                 {{ initials }}

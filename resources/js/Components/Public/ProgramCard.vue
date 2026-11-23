@@ -28,7 +28,7 @@ const icon = computed(() => iconBySlug[props.program.slug] ?? GraduationCap);
 </script>
 
 <template>
-    <article class="group relative flex h-full flex-col overflow-hidden bg-yl-green/5 transition hover:shadow-lg">
+    <article class="group relative flex h-full flex-col overflow-hidden rounded-md bg-yl-green/5 transition hover:shadow-lg">
         <div class="aspect-[16/10] overflow-hidden bg-yl-green/10">
             <img
                 :src="program.image"

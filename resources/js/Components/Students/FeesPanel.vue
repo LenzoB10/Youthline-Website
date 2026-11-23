@@ -25,18 +25,17 @@ const canApprove = can('approve payments');
 const money = (amount) => formatMoney(amount, props.finance.currency);
 
 const stateBadge = {
-    paid: ['Paid', 'bg-green-100 text-green-800'],
-    part_paid: ['Part paid', 'bg-amber-100 text-amber-800'],
-    unpaid: ['Unpaid', 'bg-red-100 text-red-800'],
-    overpaid: ['Overpaid', 'bg-sky-100 text-sky-800'],
-    pending_approval: ['Scholarship awaiting approval', 'bg-amber-100 text-amber-800'],
-    rejected: ['Scholarship rejected', 'bg-gray-200 text-gray-700'],
+    paid: ['Paid', 'bg-mustGreen/15 text-yl-green-deep dark:text-accent-light'],
+    part_paid: ['Part paid', 'bg-yl-gold/15 text-amber-800 dark:text-yl-gold'],
+    unpaid: ['Unpaid', 'bg-gray-700 text-white dark:bg-gray-300 dark:text-gray-900'],
+    overpaid: ['Overpaid', 'bg-yl-gold/15 text-yl-green-deep ring-1 ring-inset ring-yl-gold/50 dark:text-yl-gold'],
+    pending_approval: ['Scholarship awaiting approval', 'bg-yl-gold/15 text-amber-800 dark:text-yl-gold'],
+    rejected: ['Scholarship rejected', 'bg-gray-200 text-gray-700 dark:bg-gray-500/20 dark:text-gray-300'],
 };
 const paymentBadge = {
-    paid: 'bg-green-100 text-green-800',
-    pending_approval: 'bg-amber-100 text-amber-800',
-    rejected: 'bg-gray-200 text-gray-700',
-    error: 'bg-red-100 text-red-800',
+    paid: 'bg-mustGreen/15 text-yl-green-deep dark:text-accent-light',
+    rejected: 'bg-gray-200 text-gray-700 dark:bg-gray-500/20 dark:text-gray-300',
+    error: 'bg-gray-700 text-white dark:bg-gray-300 dark:text-gray-900',
 };
 
 const feeModal = ref({ show: false, fee: null });
@@ -72,7 +71,7 @@ const destroyFee = () => {
                 <dt class="text-xs uppercase tracking-wider text-text-muted">Paid</dt>
                 <dd class="text-lg font-bold text-mustGreen">{{ money(totals.paid) }}</dd>
             </div>
-            <div class="rounded-lg p-3" :class="totals.balance > 0 ? 'bg-red-50 dark:bg-red-500/10' : 'bg-mustGreen/5'">
+            <div class="rounded-lg p-3" :class="totals.balance > 0 ? 'bg-gray-100 dark:bg-white/5' : 'bg-mustGreen/5'">
                 <dt class="text-xs uppercase tracking-wider text-text-muted">Still to pay</dt>
                 <dd class="text-lg font-bold" :class="totals.balance > 0 ? 'text-red-700' : 'text-mustBlue dark:text-text-inverted'">{{ money(totals.balance) }}</dd>
             </div>
@@ -146,7 +145,7 @@ const destroyFee = () => {
                                 <ExternalLink class="h-4 w-4" />
                             </a>
                             <button
-                                v-if="canManage && ['paid', 'pending_approval'].includes(p.status)"
+                                v-if="canManage && p.status === 'paid'"
                                 type="button"
                                 class="inline-flex items-center gap-1 text-xs text-red-600 hover:underline"
                                 @click="errorPayment = { fee, payment: p }"
@@ -176,8 +175,6 @@ const destroyFee = () => {
             :fee="paymentFee"
             :methods="methods"
             :currency="finance.currency"
-            :payment-limit="finance.paymentLimit"
-            :can-approve="canApprove"
             @close="paymentFee = null"
         />
         <ReasonModal

@@ -133,8 +133,8 @@ const submit = () => {
                     :class="
                         'rounded-full px-2 py-1 text-xs font-medium ' +
                         (item.status == 'active'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800')
+                            ? 'bg-mustGreen/15 text-yl-green-deep dark:text-accent-light'
+                            : 'bg-gray-200 text-gray-700 dark:bg-gray-500/20 dark:text-gray-300')
                     "
                 >
                     {{ item.status }}

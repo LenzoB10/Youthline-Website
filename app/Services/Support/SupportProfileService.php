@@ -3,16 +3,16 @@
 namespace App\Services\Support;
 
 use App\Enums\AlumniOutcomeType;
-use App\Enums\ApplicationStatus;
-use App\Enums\ApplicationType;
+use App\Enums\FamilySupportType;
 use App\Enums\FundingType;
 use App\Enums\SessionType;
 use App\Models\Business;
+use App\Models\FamilySupport;
+use App\Models\Household;
 use App\Models\ItemCategory;
 use App\Models\Mentor;
 use App\Models\MentorshipSession;
 use App\Models\Photo;
-use App\Models\RepairProject;
 use App\Models\Student;
 use App\Models\User;
 use App\Services\Settings\SystemSettingsService;
@@ -39,11 +39,10 @@ class SupportProfileService
             'distributions' => fn ($q) => $q->with(['itemCategory:id,name,unit_cost', 'recorder:id,name'])->latest('given_on')->latest('id'),
             'currentMentorAssignment.mentor',
             'mentorshipSessions' => fn ($q) => $q->with(['mentor:id,name', 'recorder:id,name'])->latest('session_date')->latest('id'),
-            'household.homeVisits' => fn ($q) => $q->with(['recorder:id,name', 'photos'])->latest('visit_date'),
-            'household.repairProjects' => fn ($q) => $q->with(['photos', 'approver:id,name'])->latest('id'),
+            'household.latestVisit',
             'businesses' => fn ($q) => $q->withSum('loanRepayments as repaid_total', 'amount')
                 ->with(['checkins' => fn ($c) => $c->with('recorder:id,name')->latest('checkin_date'), 'loanRepayments' => fn ($r) => $r->latest('paid_on')]),
-            'careerInterests', 'applications' => fn ($q) => $q->latest('applied_on'), 'alumniOutcomes' => fn ($q) => $q->latest('recorded_on'),
+            'alumniOutcomes' => fn ($q) => $q->latest('recorded_on'),
         ]);
 
         return [
@@ -58,23 +57,12 @@ class SupportProfileService
                 ])->values(),
                 'total' => round($student->distributions->sum(fn ($d) => $d->value()), 2),
                 'thisYear' => $this->basicNeeds->studentTotal($student, now()->startOfYear()),
+                'canReceive' => $student->status->canReceiveBasicNeeds(),
             ],
             'mentorship' => $this->mentorship($student, $viewer),
             'home' => $this->home($student),
             'businesses' => $student->businesses->map(fn (Business $b) => $this->business($b))->values(),
             'careers' => [
-                'interests' => $student->careerInterests->pluck('interest')->values(),
-                'applications' => $student->applications->map(fn ($a) => [
-                    'id' => $a->id,
-                    'type' => $a->type->value,
-                    'type_label' => $a->type->label(),
-                    'organisation' => $a->organisation,
-                    'course' => $a->course,
-                    'applied_on' => $a->applied_on?->toDateString(),
-                    'status' => $a->status->value,
-                    'status_label' => $a->status->label(),
-                    'notes' => $a->notes,
-                ])->values(),
                 'outcomes' => $student->alumniOutcomes->map(fn ($o) => [
                     'id' => $o->id,
                     'recorded_on' => $o->recorded_on?->toDateString(),
@@ -100,8 +88,6 @@ class SupportProfileService
                 ->map(fn ($m) => ['value' => $m->id, 'label' => $m->name]),
             'sessionTypes' => SessionType::options(),
             'fundingTypes' => FundingType::options(),
-            'applicationTypes' => ApplicationType::options(),
-            'applicationStatuses' => ApplicationStatus::options(),
             'outcomeTypes' => AlumniOutcomeType::options(),
         ];
     }
@@ -143,6 +129,9 @@ class SupportProfileService
     }
 
     /**
+     * The student's family, as a summary — visits and support are recorded on the
+     * family's own page (Support → Families).
+     *
      * @return array<string, mixed>
      */
     protected function home(Student $student): array
@@ -152,16 +141,57 @@ class SupportProfileService
             return ['household' => null];
         }
 
+        $latest = $household->latestVisit;
+
+        return [
+            'household' => ['id' => $household->id, 'name' => $household->displayName()],
+            'lastVisit' => $latest?->visit_date?->toDateString(),
+            'nextVisitDue' => $latest?->next_visit_due?->toDateString(),
+            'visitOverdue' => $household->is_supported && (! $latest || ($latest->next_visit_due?->isPast() ?? false)),
+            'needsIdentified' => $latest?->needs_identified,
+            'visits' => $household->homeVisits()->count(),
+            'supportTotal' => round((float) $household->familySupports()->sum('amount'), 2),
+            'lastSupport' => $household->familySupports()->max('given_on'),
+            'isSupported' => $household->is_supported,
+        ];
+    }
+
+    /**
+     * A family's own page: details, consent, students, visits and the support given.
+     *
+     * @return array<string, mixed>
+     */
+    public function household(Household $household): array
+    {
+        $household->load([
+            'students:id,household_id,first_name,last_name,status',
+            'homeVisits' => fn ($q) => $q->with(['recorder:id,name', 'photos'])->latest('visit_date'),
+            'familySupports' => fn ($q) => $q->with(['photos', 'creator:id,name'])->latest('given_on')->latest('id'),
+        ]);
         $latest = $household->homeVisits->first();
 
         return [
-            'household' => ['id' => $household->id, 'name' => $household->head_name ?: 'Unnamed household'],
+            'household' => [
+                'id' => $household->id,
+                'name' => $household->displayName(),
+                'head_name' => $household->head_name,
+                'village_area' => $household->village_area,
+                'district' => $household->district,
+                'phone' => $household->phone,
+                'members_count' => $household->members_count,
+                'notes' => $household->notes,
+                'is_supported' => $household->is_supported,
+                'photo_consent' => $household->photo_consent,
+                'photo_consent_on' => $household->photo_consent_on?->toDateString(),
+                'students' => $household->students->map(fn (Student $s) => [
+                    'id' => $s->id, 'name' => $s->full_name, 'status' => $s->status->label(),
+                ])->values(),
+            ],
             'photoConsent' => $household->photoConsentGiven(),
             'nextVisitDue' => $latest?->next_visit_due?->toDateString(),
             'visitOverdue' => ! $latest || ($latest->next_visit_due?->isPast() ?? false),
             'defaultNextVisitMonths' => $this->settings->homeVisitIntervalMonths(),
-            'repairApprovalLimit' => $this->settings->get()->require_repair_approval
-                ? (float) $this->settings->get()->repair_approval_limit : null,
+            'supportTypes' => FamilySupportType::options(),
             'visits' => $household->homeVisits->map(fn ($v) => [
                 'id' => $v->id,
                 'visit_date' => $v->visit_date?->toDateString(),
@@ -173,21 +203,18 @@ class SupportProfileService
                 'recorded_by' => $v->recorder?->name,
                 'photos' => $v->photos->map(fn (Photo $p) => $this->photo($p))->values(),
             ])->values(),
-            'repairs' => $household->repairProjects->map(fn (RepairProject $r) => [
-                'id' => $r->id,
-                'description' => $r->description,
-                'estimated_cost' => $r->estimated_cost !== null ? (float) $r->estimated_cost : null,
-                'actual_cost' => $r->actual_cost !== null ? (float) $r->actual_cost : null,
-                'status' => $r->status->value,
-                'status_label' => $r->status->label(),
-                'next_status_label' => $r->status->next()?->label(),
-                'approval_status' => $r->approval_status->value,
-                'rejection_reason' => $r->rejection_reason,
-                'approved_by' => $r->approver?->name,
-                'started_on' => $r->started_on?->toDateString(),
-                'completed_on' => $r->completed_on?->toDateString(),
-                'photos' => $r->photos->map(fn (Photo $p) => $this->photo($p))->values(),
+            'support' => $household->familySupports->map(fn (FamilySupport $f) => [
+                'id' => $f->id,
+                'given_on' => $f->given_on?->toDateString(),
+                'type' => $f->type->value,
+                'type_label' => $f->type->label(),
+                'description' => $f->description,
+                'amount' => $f->amount !== null ? (float) $f->amount : null,
+                'note' => $f->note,
+                'recorded_by' => $f->creator?->name,
+                'photos' => $f->photos->map(fn (Photo $p) => $this->photo($p))->values(),
             ])->values(),
+            'supportTotal' => round((float) $household->familySupports->sum(fn (FamilySupport $f) => (float) $f->amount), 2),
         ];
     }
 

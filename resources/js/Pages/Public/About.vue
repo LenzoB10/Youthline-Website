@@ -5,8 +5,8 @@ import SectionHeading from '@/Components/Public/SectionHeading.vue';
 import TeamCard from '@/Components/Public/TeamCard.vue';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { ArrowRight, CircleCheck } from 'lucide-vue-next';
-import { computed, ref } from 'vue';
+import { ArrowRight, HandHeart, HeartHandshake, Lightbulb, Scale, ShieldCheck, Sparkles, Sprout, Target, TrendingUp, Users } from 'lucide-vue-next';
+import { computed } from 'vue';
 
 const props = defineProps({
     page: { type: Object, default: null },
@@ -18,25 +18,32 @@ const props = defineProps({
     impact: { type: Array, default: () => [] },
 });
 
-const purposeTabs = computed(() => [
-    { key: 'mission', label: 'Our Mission', title: props.mission?.title || 'Our Mission', body: props.mission?.body },
-    { key: 'vision', label: 'Our Vision', title: props.vision?.title || 'Our Vision', body: props.vision?.body },
-    ...(props.values.length ? [{ key: 'values', label: 'Core Values', title: 'Our Core Values' }] : []),
+// Mission, vision and goal as three centred columns. `word` is the coloured half of the title.
+const purpose = computed(() => [
+    { key: 'mission', word: 'Mission', body: props.mission?.body, icon: Target },
+    { key: 'vision', word: 'Vision', body: props.vision?.body, icon: Lightbulb },
     {
         key: 'goal',
-        label: 'Our Goal',
-        title: 'Our Goal',
+        word: 'Goal',
         body: 'Our goal is to reach more students and families who need support in their day-to-day lives.',
+        icon: HandHeart,
     },
-]);
-const activePurpose = ref('mission');
-const currentPurpose = computed(() => purposeTabs.value.find((tab) => tab.key === activePurpose.value));
-const movePurpose = (step) => {
-    const keys = purposeTabs.value.map((tab) => tab.key);
-    const next = keys[(keys.indexOf(activePurpose.value) + step + keys.length) % keys.length];
-    activePurpose.value = next;
-    document.getElementById(`purpose-tab-${next}`)?.focus();
-};
+].filter((item) => item.body));
+
+// Core values have no icon of their own, so pick one from the value's name.
+// Values added later in the admin get a general icon.
+const VALUE_ICONS = [
+    [/compassion|care|kind/i, HeartHandshake],
+    [/empower/i, TrendingUp],
+    [/integrity|honest|trust|account/i, ShieldCheck],
+    [/equity|equal|fair|inclus/i, Scale],
+    [/resilien|growth|perseve/i, Sprout],
+    [/community|together|partner/i, Users],
+];
+const valueIcon = (name) => VALUE_ICONS.find(([pattern]) => pattern.test(name ?? ''))?.[1] ?? Sparkles;
+
+// Live "young people supported" figure for the card on the photos.
+const supported = computed(() => props.impact.find((metric) => metric.key === 'supported')?.value ?? 0);
 
 const paragraphs = computed(() =>
     (props.page?.body ?? '').split('\n\n').filter((line) => line.trim().length > 0),
@@ -52,8 +59,9 @@ const paragraphs = computed(() =>
         <!-- Narrative -->
         <section class="py-20 sm:py-24">
             <div class="yl-container grid items-center gap-14 lg:grid-cols-2 lg:gap-16">
-                <!-- Two overlapping photos -->
-                <div v-reveal:left class="relative mx-auto w-full max-w-xl pb-16 pr-10 sm:pb-24 sm:pr-16">
+                <!-- Two overlapping photos with the figure card, laid out in the reference's proportions.
+                     Every position is a percentage of this box (and text uses cqw), so spacing stays identical at any size. -->
+                <div v-reveal:left class="photo-group relative mx-auto aspect-[564/483] w-full max-w-xl">
                     <img
                         src="/imgs/web/md/IMG20261028134003.jpg"
                         alt="Young people supported by Youthline"
@@ -61,8 +69,17 @@ const paragraphs = computed(() =>
                         height="1067"
                         loading="lazy"
                         decoding="async"
-                        class="aspect-[4/3] w-[85%] object-cover object-[center_30%] shadow-lg"
+                        class="absolute left-0 top-0 h-[76.4%] w-[69.9%] rounded-md object-cover object-[center_30%] shadow-lg"
                     />
+                    <div
+                        v-if="supported"
+                        class="yl-slant-card absolute left-[50.9%] top-[10.6%] z-10 flex h-[30%] w-[38.7%] flex-col justify-center rounded-md bg-yl-green-deep pl-[4.5cqw] text-white shadow-xl"
+                    >
+                        <p class="text-[7.5cqw] font-bold leading-none">{{ supported }}<span class="text-yl-gold">+</span></p>
+                        <p class="mt-[2.2cqw] text-[2.1cqw] font-bold uppercase leading-snug tracking-wider text-white/90">
+                            Young people<br />supported
+                        </p>
+                    </div>
                     <img
                         src="/imgs/web/md/IMG20261028134008.jpg"
                         alt=""
@@ -70,7 +87,7 @@ const paragraphs = computed(() =>
                         height="1067"
                         loading="lazy"
                         decoding="async"
-                        class="absolute bottom-0 right-0 aspect-[4/3] w-[60%] border-8 border-white object-cover object-[center_30%] shadow-xl"
+                        class="absolute bottom-0 right-0 z-20 h-[51.1%] w-[58.3%] rounded-md border-[1.2cqw] border-white object-cover object-[center_30%] shadow-xl"
                     />
                 </div>
 
@@ -96,72 +113,67 @@ const paragraphs = computed(() =>
         <!-- Impact at a glance -->
         <ImpactGlance :metrics="impact" image="/imgs/web/lg/IMG20261028134007.jpg" />
 
-        <!-- Mission / Vision / Goal (tabs) -->
-        <section class="bg-yl-cream py-20 sm:py-24">
-            <div class="yl-container grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
-                <div v-reveal:left>
-                    <p class="yl-eyebrow">Our purpose</p>
-                    <h2 class="yl-h2 mt-3">What drives everything we do</h2>
+        <!-- Our purpose: mission, vision and goal in three columns -->
+        <section class="bg-white py-20 sm:py-24">
+            <div class="yl-container">
+                <SectionHeading v-reveal eyebrow="Our purpose" title="What drives everything we do" />
 
-                    <div class="mt-8 flex flex-wrap gap-3" role="tablist" aria-label="Mission, vision and goal">
-                        <button
-                            v-for="tab in purposeTabs"
-                            :id="`purpose-tab-${tab.key}`"
-                            :key="tab.key"
-                            type="button"
-                            role="tab"
-                            :aria-selected="activePurpose === tab.key ? 'true' : 'false'"
-                            :aria-controls="`purpose-panel-${tab.key}`"
-                            :tabindex="activePurpose === tab.key ? 0 : -1"
-                            class="rounded-full px-6 py-2.5 text-xs font-bold uppercase tracking-wider transition focus:outline-none focus-visible:ring-2 focus-visible:ring-yl-green focus-visible:ring-offset-2"
-                            :class="
-                                activePurpose === tab.key
-                                    ? 'bg-yl-green-deep text-white shadow-md'
-                                    : 'bg-white text-yl-green-deep shadow-sm hover:bg-yl-green/10'
-                            "
-                            @click="activePurpose = tab.key"
-                            @keydown.right.prevent="movePurpose(1)"
-                            @keydown.left.prevent="movePurpose(-1)"
-                        >
-                            {{ tab.label }}
-                        </button>
-                    </div>
+                <div v-reveal.stagger="150" class="mt-16 grid gap-14 md:grid-cols-3 md:gap-0 md:divide-x md:divide-yl-green/15">
+                    <article v-for="item in purpose" :key="item.key" class="group flex flex-col items-center px-4 text-center md:px-10 lg:px-14">
+                        <!-- Large icon with a soft gold accent behind it -->
+                        <span class="relative flex h-28 w-28 items-center justify-center" aria-hidden="true">
+                            <span class="absolute right-3 top-3 h-12 w-12 rounded-full bg-yl-gold/25 transition duration-500 group-hover:scale-125"></span>
+                            <component :is="item.icon" class="relative h-20 w-20 text-yl-green-deep transition duration-500 group-hover:-translate-y-1" :stroke-width="1.25" />
+                        </span>
 
-                    <Transition name="purpose" mode="out-in">
-                        <div
-                            :id="`purpose-panel-${currentPurpose.key}`"
-                            :key="currentPurpose.key"
-                            role="tabpanel"
-                            :aria-labelledby="`purpose-tab-${currentPurpose.key}`"
-                            class="mt-8"
-                        >
-                            <h3 class="text-2xl font-bold text-yl-green-deep">{{ currentPurpose.title }}</h3>
-                            <ul v-if="currentPurpose.key === 'values'" class="mt-5 grid gap-x-8 gap-y-5 sm:grid-cols-2">
-                                <li v-for="value in values" :key="value.id" class="flex gap-3">
-                                    <CircleCheck class="mt-0.5 h-5 w-5 shrink-0 text-yl-green" aria-hidden="true" />
-                                    <div>
-                                        <p class="font-semibold text-yl-green-deep">{{ value.name }}</p>
-                                        <p v-if="value.description" class="mt-1 text-sm leading-relaxed text-yl-ink/70">
-                                            {{ value.description }}
-                                        </p>
-                                    </div>
-                                </li>
-                            </ul>
-                            <p v-else class="mt-4 text-lg leading-relaxed text-yl-ink/75">{{ currentPurpose.body }}</p>
+                        <h3 class="mt-6 text-xl font-extrabold uppercase tracking-wide text-yl-ink">
+                            Our <span class="text-yl-green">{{ item.word }}</span>
+                        </h3>
+
+                        <!-- line · dot · line -->
+                        <div class="mt-5 flex items-center gap-1.5" aria-hidden="true">
+                            <span class="h-px w-10 bg-yl-green/50"></span>
+                            <span class="h-1.5 w-1.5 rounded-full bg-yl-green"></span>
+                            <span class="h-px w-10 bg-yl-green/50"></span>
                         </div>
-                    </Transition>
-                </div>
 
-                <img
-                    v-reveal:right
-                    src="/imgs/web/md/IMG20261028134009.jpg"
-                    alt="Young people supported by Youthline"
-                    width="800"
-                    height="1067"
-                    loading="lazy"
-                    decoding="async"
-                    class="aspect-[4/3] w-full object-cover object-[center_30%] shadow-lg"
-                />
+                        <component :is="item.icon" class="mt-5 h-5 w-5 text-yl-green/70" aria-hidden="true" />
+
+                        <p class="mt-5 max-w-sm leading-relaxed text-yl-ink/70">{{ item.body }}</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- Core values: a grid separated only by thin lines -->
+        <section v-if="values.length" class="bg-yl-cream py-20 sm:py-24">
+            <div class="yl-container">
+                <h2 v-reveal class="yl-h2 text-center">Our Core Values</h2>
+
+                <ul v-reveal.stagger="100" class="mx-auto mt-14 grid max-w-6xl md:grid-cols-2 lg:grid-cols-3">
+                    <li
+                        v-for="(value, i) in values"
+                        :key="value.id"
+                        class="group border-b border-yl-ink/10 px-6 py-10 last:border-b-0 sm:px-10
+                            md:max-lg:[&:nth-child(odd)]:border-r md:max-lg:[&:nth-last-child(-n+2)]:border-b-0
+                            lg:[&:not(:nth-child(3n))]:border-r lg:[&:nth-last-child(-n+3)]:border-b-0"
+                    >
+                        <span class="relative inline-flex h-12 w-12 items-center justify-center" aria-hidden="true">
+                            <span
+                                class="absolute bottom-0 right-0 h-7 w-7 rounded-full transition duration-500 group-hover:scale-125"
+                                :class="i % 2 ? 'bg-yl-green/15' : 'bg-yl-gold/30'"
+                            ></span>
+                            <component
+                                :is="valueIcon(value.name)"
+                                class="relative h-9 w-9 transition duration-500 group-hover:-translate-y-0.5"
+                                :class="i % 2 ? 'text-yl-gold' : 'text-yl-green'"
+                                :stroke-width="1.5"
+                            />
+                        </span>
+                        <h3 class="mt-5 text-lg font-bold text-yl-green-deep">{{ value.name }}</h3>
+                        <p v-if="value.description" class="mt-3 text-sm leading-relaxed text-yl-ink/65">{{ value.description }}</p>
+                    </li>
+                </ul>
             </div>
         </section>
 
@@ -173,7 +185,7 @@ const paragraphs = computed(() =>
             />
             <div v-reveal class="yl-container relative">
                 <div class="mx-auto max-w-3xl text-center">
-                    <p class="yl-eyebrow text-yl-gold">{{ commitment.summary }}</p>
+                    <p class="yl-eyebrow !text-white">{{ commitment.summary }}</p>
                     <h2 class="mt-3 text-3xl font-bold sm:text-4xl">{{ commitment.title }}</h2>
                     <p class="mt-5 text-lg leading-relaxed text-white/80">{{ commitment.body }}</p>
                     <Link :href="route('get-involved')" class="yl-btn-accent mt-8">
@@ -200,13 +212,8 @@ const paragraphs = computed(() =>
 </template>
 
 <style scoped>
-.purpose-enter-active,
-.purpose-leave-active {
-    transition: opacity 0.25s ease, transform 0.25s ease;
-}
-.purpose-enter-from,
-.purpose-leave-to {
-    opacity: 0;
-    transform: translateY(6px);
+/* Lets the card text and border scale with the photo group (cqw units). */
+.photo-group {
+    container-type: inline-size;
 }
 </style>

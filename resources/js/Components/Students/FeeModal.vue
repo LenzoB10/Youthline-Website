@@ -62,7 +62,7 @@ const submit = () => {
         <div class="p-6">
             <ModalHeader :title="fee ? 'Edit term fees' : 'Add term fees'" :close="close" />
 
-            <p v-if="!fee && needsApproval" class="mb-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">
+            <p v-if="!fee && needsApproval" class="mb-4 rounded-lg bg-yl-gold/10 p-3 text-sm text-amber-800 dark:bg-yl-gold/10 dark:text-yl-gold">
                 This is {{ student.first_name }}'s first fee entry — a <strong>new scholarship</strong>. It will wait for Admin approval before any payment can be recorded.
             </p>
 

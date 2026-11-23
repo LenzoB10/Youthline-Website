@@ -1,19 +1,17 @@
 <?php
 
-use App\Enums\FeeApproval;
-use App\Enums\RepairStatus;
 use App\Models\Business;
 use App\Models\Consent;
 use App\Models\Distribution;
+use App\Models\FamilySupport;
 use App\Models\HomeVisit;
 use App\Models\Household;
 use App\Models\ItemCategory;
 use App\Models\Mentor;
 use App\Models\MentorshipSession;
 use App\Models\Photo;
-use App\Models\RepairProject;
 use App\Models\User;
-use App\Notifications\RepairAwaitingApproval;
+use App\Services\Dashboard\OrganisationOverviewService;
 use App\Services\Settings\SystemSettingsService;
 use App\Services\Support\BasicNeedsService;
 use App\Services\Support\BusinessService;
@@ -21,6 +19,7 @@ use App\Services\Support\HomeVisitService;
 use App\Services\Support\MentorshipService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia;
 
@@ -47,8 +46,9 @@ it('records money for basic needs per student and as a group handout, with total
     $today = now()->toDateString();
 
     actingAs($this->manager)->post(route('students.distributions.store', $this->student), [
-        'given_on' => $today, 'amount' => 25000,
+        'given_on' => $today, 'amount' => 25000, 'note' => 'School shoes',
     ])->assertSessionHasNoErrors();
+    expect(Distribution::query()->sole()->note)->toBe('School shoes');
 
     actingAs($this->manager)->post(route('support.basic-needs.group'), [
         'given_on' => $today, 'amount' => 20000, 'note' => 'Groceries',
@@ -74,6 +74,24 @@ it('records money for basic needs per student and as a group handout, with total
     $entry = Distribution::query()->first();
     actingAs($this->manager)->delete(route('students.distributions.destroy', [$entry->student_id, $entry]))->assertForbidden();
     actingAs($this->admin)->delete(route('students.distributions.destroy', [$entry->student_id, $entry]))->assertSessionHas('success');
+});
+
+it('gives no basic needs to graduates, while business support stays open to them', function () {
+    $graduate = makeLearner('graduated', ['first_name' => 'Tadala']);
+    $today = now()->toDateString();
+
+    actingAs($this->manager)->post(route('students.distributions.store', $graduate), ['given_on' => $today, 'amount' => 20000])
+        ->assertSessionHasErrors('amount');
+    actingAs($this->manager)->post(route('support.basic-needs.group'), [
+        'given_on' => $today, 'amount' => 20000, 'student_ids' => [$this->student->id, $graduate->id],
+    ])->assertSessionHasErrors('student_ids.1');
+
+    expect(Distribution::query()->count())->toBe(0)
+        ->and($graduate->status->canReceiveBasicNeeds())->toBeFalse();
+
+    // The profile tells the screen to hide the form.
+    actingAs($this->manager)->get(route('students.show', $graduate))
+        ->assertInertia(fn (AssertableInertia $page) => $page->where('support.basicNeeds.canReceive', false));
 });
 
 it('still counts older item records at their unit cost', function () {
@@ -142,7 +160,7 @@ it('changes mentors without losing the history', function () {
 // --- Home visits -------------------------------------------------------------
 
 it('records a visit with a default next visit date and updates the household size', function () {
-    actingAs($this->manager)->post(route('students.visits.store', $this->student), [
+    actingAs($this->manager)->post(route('support.families.visits.store', $this->household), [
         'visit_date' => '2026-03-10', 'members_count' => 6, 'needs_identified' => 'Roof leaks',
     ])->assertSessionHasNoErrors();
 
@@ -154,12 +172,12 @@ it('records a visit with a default next visit date and updates the household siz
 it('only accepts visit photos when a guardian gave photo consent, and keeps them private', function () {
     $photo = fn () => UploadedFile::fake()->image('house.jpg');
 
-    actingAs($this->manager)->post(route('students.visits.store', $this->student), [
+    actingAs($this->manager)->post(route('support.families.visits.store', $this->household), [
         'visit_date' => now()->toDateString(), 'photos' => [$photo()],
     ])->assertSessionHasErrors('photos');
 
     Consent::create(['student_id' => $this->student->id, 'photo_allowed' => true]);
-    actingAs($this->manager)->post(route('students.visits.store', $this->student), [
+    actingAs($this->manager)->post(route('support.families.visits.store', $this->household), [
         'visit_date' => now()->toDateString(), 'photos' => [$photo()],
     ])->assertSessionHasNoErrors();
 
@@ -169,12 +187,80 @@ it('only accepts visit photos when a guardian gave photo consent, and keeps them
     actingAs($this->outsider)->get(route('support.photos.show', $stored))->assertForbidden();
 });
 
-it('won\'t touch a visit through another student\'s profile', function () {
+it('only touches a visit through its own family', function () {
     $visit = HomeVisit::create(['household_id' => $this->household->id, 'visit_date' => now()]);
-    $stranger = makeLearner(attributes: ['first_name' => 'Other', 'household_id' => Household::create([])->id]);
+    $otherFamily = Household::create(['head_name' => 'Other']);
 
-    actingAs($this->admin)->delete(route('students.visits.destroy', [$stranger, $visit]))->assertNotFound();
-    actingAs($this->admin)->delete(route('students.visits.destroy', [$this->student, $visit]))->assertSessionHas('success');
+    actingAs($this->admin)->delete(route('support.families.visits.destroy', [$otherFamily, $visit]))->assertNotFound();
+    actingAs($this->admin)->delete(route('support.families.visits.destroy', [$this->household, $visit]))->assertSessionHas('success');
+});
+
+it('adds a community family with no student and supports it like any other', function () {
+    actingAs($this->manager)->post(route('support.families.store'), [
+        'head_name' => 'Esnart Phiri', 'district' => 'Zomba', 'members_count' => 7, 'notes' => 'Widow caring for orphans',
+    ])->assertSessionHasNoErrors();
+
+    $family = Household::query()->where('head_name', 'Esnart Phiri')->sole();
+    expect($family->is_supported)->toBeTrue()
+        ->and($family->created_by)->toBe($this->manager->id)
+        ->and($family->students()->count())->toBe(0);
+
+    // It gets visit reminders even with no student.
+    expect(app(HomeVisitService::class)->dueHouseholds()->pluck('household_id'))->toContain($family->id);
+
+    // Visits and support work the same way.
+    actingAs($this->manager)->post(route('support.families.visits.store', $family), ['visit_date' => now()->toDateString()])->assertSessionHasNoErrors();
+    actingAs($this->manager)->post(route('support.families.support.store', $family), [
+        'given_on' => now()->toDateString(), 'type' => 'food', 'description' => 'Maize and cooking oil', 'amount' => 45000,
+    ])->assertSessionHasNoErrors();
+    expect($family->homeVisits()->count())->toBe(1)->and($family->familySupports()->count())->toBe(1);
+
+    actingAs($this->manager)->get(route('support.families.show', $family))
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->component('Support/Household')
+            ->where('household.name', 'Esnart Phiri')
+            ->has('household.students', 0)
+            ->has('visits', 1)
+            ->has('support', 1)
+            ->where('supportTotal', 45000));
+});
+
+it('lets a family give its own photo consent', function () {
+    $family = Household::create(['head_name' => 'Community family']);
+    $photo = fn () => UploadedFile::fake()->image('home.jpg');
+
+    actingAs($this->manager)->post(route('support.families.visits.store', $family), ['visit_date' => now()->toDateString(), 'photos' => [$photo()]])
+        ->assertSessionHasErrors('photos');
+
+    actingAs($this->manager)->put(route('support.families.consent', $family), ['photo_consent' => true])->assertSessionHasErrors('photo_consent_on');
+    actingAs($this->manager)->put(route('support.families.consent', $family), ['photo_consent' => true, 'photo_consent_on' => now()->toDateString()])
+        ->assertSessionHasNoErrors();
+
+    actingAs($this->manager)->post(route('support.families.visits.store', $family), ['visit_date' => now()->toDateString(), 'photos' => [$photo()]])
+        ->assertSessionHasNoErrors();
+    expect(Photo::query()->count())->toBe(1);
+});
+
+it('stops visit reminders when a family is no longer supported, keeping its history', function () {
+    HomeVisit::create(['household_id' => $this->household->id, 'visit_date' => now()->subYears(2), 'next_visit_due' => now()->subYear()]);
+    expect(app(HomeVisitService::class)->dueHouseholds()->pluck('household_id'))->toContain($this->household->id);
+
+    actingAs($this->manager)->put(route('support.families.update', $this->household), ['head_name' => 'Banda', 'is_supported' => false])
+        ->assertSessionHasNoErrors();
+
+    expect(app(HomeVisitService::class)->dueHouseholds())->toBeEmpty()
+        ->and($this->household->homeVisits()->count())->toBe(1);
+});
+
+it('shows a summary of the family on the student profile', function () {
+    HomeVisit::create(['household_id' => $this->household->id, 'visit_date' => '2026-03-10', 'next_visit_due' => '2027-03-10', 'needs_identified' => 'Roof']);
+
+    actingAs($this->manager)->get(route('students.show', $this->student))
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->where('support.home.household.id', $this->household->id)
+            ->where('support.home.lastVisit', '2026-03-10')
+            ->where('support.home.visits', 1)
+            ->where('support.home.needsIdentified', 'Roof'));
 });
 
 it('lists families due a visit', function () {
@@ -185,47 +271,60 @@ it('lists families due a visit', function () {
     expect(app(HomeVisitService::class)->dueHouseholds())->toBeEmpty();
 });
 
-// --- Repairs -----------------------------------------------------------------
+// --- Family support ----------------------------------------------------------
 
-it('holds large repair budgets for the Admin, then moves Planned → In progress → Completed', function () {
-    actingAs($this->manager)->post(route('students.repairs.store', $this->student), [
-        'description' => 'New roof', 'estimated_cost' => 1500000, 'photos' => [UploadedFile::fake()->image('before.jpg')],
+it('records the support given to a family, with type, amount and photos', function () {
+    $this->household->update(['photo_consent' => true, 'photo_consent_on' => now()->toDateString()]);
+
+    actingAs($this->manager)->post(route('support.families.support.store', $this->household), [
+        'given_on' => '2026-03-02', 'type' => 'home_repair', 'description' => 'Roof sheets replaced', 'amount' => 300000,
+        'note' => 'Rainy season leak', 'photos' => [UploadedFile::fake()->image('roof.jpg')],
+    ])->assertSessionHas('success', 'Support recorded.');
+    // Amount is optional (e.g. donated items).
+    actingAs($this->manager)->post(route('support.families.support.store', $this->household), [
+        'given_on' => now()->toDateString(), 'type' => 'household_items', 'description' => 'Blankets',
     ])->assertSessionHasNoErrors();
 
-    $repair = RepairProject::query()->sole();
-    expect($repair->approval_status)->toBe(FeeApproval::Pending)
-        ->and($repair->photos()->value('kind'))->toBe('before');
-    Notification::assertSentTo($this->admin, RepairAwaitingApproval::class);
+    $roof = FamilySupport::query()->where('type', 'home_repair')->sole();
+    expect($roof->amount)->toBe('300000.00')
+        ->and($roof->created_by)->toBe($this->manager->id)
+        ->and($roof->photos()->count())->toBe(1)
+        ->and(FamilySupport::query()->count())->toBe(2);
 
-    // No work before approval.
-    actingAs($this->manager)->post(route('students.repairs.advance', [$this->student, $repair]))->assertSessionHasErrors('status');
+    // Validation: a type from the list, something described, no future dates.
+    actingAs($this->manager)->post(route('support.families.support.store', $this->household), [
+        'given_on' => now()->addDay()->toDateString(), 'type' => 'car', 'description' => '',
+    ])->assertSessionHasErrors(['given_on', 'type', 'description']);
 
-    actingAs($this->manager)->put(route('finance.approvals.repairs.approve', $repair))->assertForbidden();
-    actingAs($this->admin)->put(route('finance.approvals.repairs.approve', $repair))->assertSessionHas('success');
-
-    actingAs($this->manager)->post(route('students.repairs.advance', [$this->student, $repair]), ['date' => '2026-04-01'])->assertSessionHasNoErrors();
-    expect($repair->fresh()->status)->toBe(RepairStatus::InProgress);
-
-    actingAs($this->manager)->post(route('students.repairs.advance', [$this->student, $repair]))->assertSessionHasErrors('actual_cost');
-    actingAs($this->manager)->post(route('students.repairs.advance', [$this->student, $repair]), [
-        'actual_cost' => 1450000, 'photos' => [UploadedFile::fake()->image('after.jpg')],
-    ])->assertSessionHasNoErrors();
-
-    $repair->refresh();
-    expect($repair->status)->toBe(RepairStatus::Completed)
-        ->and((float) $repair->actual_cost)->toBe(1450000.0)
-        ->and($repair->photos()->where('kind', 'after')->count())->toBe(1);
-
-    actingAs($this->manager)->post(route('students.repairs.advance', [$this->student, $repair]))->assertSessionHasErrors('status');
+    // Only the Admin deletes, and only through the entry's own family.
+    $other = Household::create(['head_name' => 'Other']);
+    actingAs($this->manager)->delete(route('support.families.support.destroy', [$this->household, $roof]))->assertForbidden();
+    actingAs($this->admin)->delete(route('support.families.support.destroy', [$other, $roof]))->assertNotFound();
+    actingAs($this->admin)->delete(route('support.families.support.destroy', [$this->household, $roof]))->assertSessionHas('success');
+    expect(FamilySupport::query()->count())->toBe(1);
+    Storage::disk('local')->assertDirectoryEmpty('photos/family_support/'.$roof->id);
 });
 
-it('starts small repair budgets straight away', function () {
-    actingAs($this->manager)->post(route('students.repairs.store', $this->student), ['description' => 'Door lock', 'estimated_cost' => 20000]);
-    expect(RepairProject::query()->sole()->approval_status)->toBe(FeeApproval::Approved);
-    Notification::assertNothingSent();
+it('refuses support photos without the family\'s photo consent', function () {
+    actingAs($this->manager)->post(route('support.families.support.store', $this->household), [
+        'given_on' => now()->toDateString(), 'type' => 'food', 'description' => 'Maize',
+        'photos' => [UploadedFile::fake()->image('maize.jpg')],
+    ])->assertSessionHasErrors('photos');
+
+    expect(FamilySupport::query()->count())->toBe(0);
 });
 
-// --- Businesses --------------------------------------------------------------
+it('lists recent family support on the Families page and in spending', function () {
+    FamilySupport::create(['household_id' => $this->household->id, 'given_on' => now()->toDateString(), 'type' => 'money', 'description' => 'Rent', 'amount' => 60000]);
+
+    actingAs($this->manager)->get(route('support.families'))
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->has('recentSupport', 1)
+            ->where('supportTotals.given', 60000)
+            ->where('supportTotals.families', 1));
+
+    expect(collect(app(OrganisationOverviewService::class)->monthlySupport(1))->first()['family_support'])->toBe(60000.0);
+});
 
 it('tracks loan repayments and the remaining balance', function () {
     actingAs($this->manager)->post(route('students.businesses.store', $this->student), [
@@ -271,26 +370,19 @@ it('records check-ins, updates the running status and reminds when one is due', 
 
 // --- Careers -----------------------------------------------------------------
 
-it('records career interests, applications and alumni outcomes', function () {
-    actingAs($this->manager)->put(route('students.interests.update', $this->student), ['interests' => ['Nursing', 'Teaching']])->assertSessionHasNoErrors();
-    actingAs($this->manager)->put(route('students.interests.update', $this->student), ['interests' => ['Nursing']])->assertSessionHasNoErrors();
-    expect($this->student->careerInterests()->pluck('interest')->all())->toBe(['Nursing']);
-
-    actingAs($this->manager)->post(route('students.applications.store', $this->student), [
-        'type' => 'university', 'organisation' => 'KUHES', 'course' => 'BSc Nursing', 'status' => 'applied',
-    ])->assertSessionHasNoErrors();
-    $application = $this->student->applications()->sole();
-
-    actingAs($this->manager)->put(route('students.applications.update', [$this->student, $application]), [
-        'type' => 'university', 'organisation' => 'KUHES', 'status' => 'accepted',
-    ])->assertSessionHasNoErrors();
-    expect($application->fresh()->status->value)->toBe('accepted');
-
+it('records what graduates do afterwards, and only the Admin deletes it', function () {
     actingAs($this->manager)->post(route('students.outcomes.store', $this->student), [
         'recorded_on' => now()->toDateString(), 'outcome' => 'employed', 'details' => 'Nurse',
     ])->assertSessionHasNoErrors();
+    $outcome = $this->student->alumniOutcomes()->sole();
 
-    actingAs($this->manager)->delete(route('students.applications.destroy', [$this->student, $application]))->assertForbidden();
+    actingAs($this->manager)->delete(route('students.outcomes.destroy', [$this->student, $outcome]))->assertForbidden();
+    actingAs($this->admin)->delete(route('students.outcomes.destroy', [$this->student, $outcome]))->assertSessionHas('success');
+});
+
+it('no longer has career interests or applications', function () {
+    expect(Route::has('students.interests.update'))->toBeFalse()
+        ->and(Route::has('students.applications.store'))->toBeFalse();
 });
 
 // --- Access & pages ----------------------------------------------------------

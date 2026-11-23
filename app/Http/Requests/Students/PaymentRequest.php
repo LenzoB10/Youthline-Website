@@ -48,7 +48,7 @@ class PaymentRequest extends FormRequest
                     $validator->errors()->add(
                         'amount',
                         $room > 0
-                            ? 'Only '.number_format($room, 2).' is still owed for this term (including payments awaiting approval).'
+                            ? 'Only '.number_format($room, 2).' is still owed for this term.'
                             : 'Nothing more is owed for this term.',
                     );
                 }

@@ -36,13 +36,11 @@ class Fee extends Model
     }
 
     /**
-     * Adds paid_total and pending_total (sums of this fee's payments by status).
+     * Adds paid_total (the sum of this fee's paid payments).
      */
     public function scopeWithPaymentTotals(Builder $query): Builder
     {
-        return $query
-            ->withSum(['payments as paid_total' => fn ($q) => $q->where('status', PaymentStatus::Paid->value)], 'amount')
-            ->withSum(['payments as pending_total' => fn ($q) => $q->where('status', PaymentStatus::PendingApproval->value)], 'amount');
+        return $query->withSum(['payments as paid_total' => fn ($q) => $q->where('status', PaymentStatus::Paid->value)], 'amount');
     }
 
     public function student(): BelongsTo
@@ -81,12 +79,6 @@ class Fee extends Model
             ?? $this->payments()->where('status', PaymentStatus::Paid->value)->sum('amount'));
     }
 
-    public function pendingTotal(): float
-    {
-        return (float) ($this->pending_total
-            ?? $this->payments()->where('status', PaymentStatus::PendingApproval->value)->sum('amount'));
-    }
-
     /**
      * What Youthline still has to pay for this term. Negative means overpaid.
      */
@@ -96,11 +88,11 @@ class Fee extends Model
     }
 
     /**
-     * Room left for new payments, counting ones still waiting for approval.
+     * Room left for new payments.
      */
     public function remainingToRecord(): float
     {
-        return round($this->balance() - $this->pendingTotal(), 2);
+        return $this->balance();
     }
 
     public function isApproved(): bool

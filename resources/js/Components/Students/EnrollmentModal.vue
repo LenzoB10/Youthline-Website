@@ -51,7 +51,7 @@ const submit = () =>
                 earlier years stay exactly as they were.
             </p>
 
-            <p v-if="!currentYear" class="rounded-lg bg-amber-50 p-3 text-sm text-amber-800">
+            <p v-if="!currentYear" class="rounded-lg bg-yl-gold/10 p-3 text-sm text-amber-800">
                 No current academic year is set. An Admin can set one under Settings → Academic Calendar.
             </p>
 

@@ -1,4 +1,5 @@
 <script setup>
+import BackLink from '@/Components/Common/BackLink.vue';
 import DataTable from '@/Components/Common/Datatable.vue';
 import ConfirmationModal from '@/Components/Common/Modal/ConfirmationModal.vue';
 import Modal from '@/Components/Common/Modal/Modal.vue';
@@ -9,7 +10,7 @@ import SelectInput from '@/Components/FormElements/SelectInput.vue';
 import TextInput from '@/Components/FormElements/TextInput.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
-import { ArrowLeft, Plus, SquarePen, Trash2 } from 'lucide-vue-next';
+import { Plus, SquarePen, Trash2 } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 const props = defineProps({
@@ -67,9 +68,7 @@ const destroy = () => {
     <Head title="Institutions" />
 
     <AuthenticatedLayout>
-        <Link :href="route('admin.settings.index')" class="mb-4 inline-flex items-center gap-1 text-sm text-mustBlue dark:text-text-dark-muted">
-            <ArrowLeft class="h-4 w-4" /> Settings
-        </Link>
+        <BackLink :href="route('admin.settings.index')">Settings</BackLink>
         <div class="flex items-center justify-between">
             <h1 class="page-heading">Institutions</h1>
             <button type="button" class="btn-primary-sm inline-flex items-center gap-1" @click="openCreate">

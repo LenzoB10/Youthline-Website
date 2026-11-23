@@ -3,7 +3,8 @@ import InputError from '@/Components/FormElements/InputError.vue';
 import PageHeader from '@/Components/Public/PageHeader.vue';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
-import { Facebook, Instagram, Mail, MapPin, Phone, Twitter } from 'lucide-vue-next';
+import XLogo from '@/Components/Public/XLogo.vue';
+import { Facebook, Instagram, Mail, MapPin, Phone } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 defineProps({
@@ -36,7 +37,7 @@ const socialLinks = computed(() =>
     [
         { icon: Facebook, label: 'Facebook', href: social.value.facebook, network: 'facebook' },
         { icon: Instagram, label: 'Instagram', href: social.value.instagram, network: 'instagram' },
-        { icon: Twitter, label: 'X (Twitter)', href: social.value.x, network: 'x' },
+        { icon: XLogo, label: 'X (Twitter)', href: social.value.x, network: 'x' },
     ].filter((link) => link.href),
 );
 
@@ -68,7 +69,7 @@ const submit = () => {
 
                     <div v-reveal.stagger class="mt-10 grid gap-8 sm:grid-cols-2">
                         <div v-for="detail in details" :key="detail.label" class="flex items-start gap-4">
-                            <span class="flex h-11 w-11 shrink-0 items-center justify-center bg-yl-green-deep text-yl-gold">
+                            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-yl-green-deep text-yl-gold">
                                 <component :is="detail.icon" class="h-5 w-5" aria-hidden="true" />
                             </span>
                             <div class="min-w-0">

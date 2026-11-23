@@ -93,11 +93,11 @@ const destroy = () => {
                 <dd>{{ data.summary.last_session ? date.formatDate(data.summary.last_session) : 'None yet' }}</dd>
                 <dt class="text-text-muted">Follow-up</dt>
                 <dd>
-                    <span v-if="data.summary.follow_up_needed" class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">Needed</span>
+                    <span v-if="data.summary.follow_up_needed" class="rounded-full bg-yl-gold/15 px-2 py-0.5 text-xs font-medium text-amber-800">Needed</span>
                     <span v-else class="text-text-muted">Not needed</span>
                 </dd>
             </dl>
-            <p v-if="data.summary.is_overdue" class="mt-3 flex items-start gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-800 dark:bg-red-500/10 dark:text-red-300">
+            <p v-if="data.summary.is_overdue" class="mt-3 flex items-start gap-2 rounded-lg bg-gray-100 p-3 text-sm text-gray-800 dark:bg-white/5 dark:text-gray-300">
                 <AlertTriangle class="mt-0.5 h-4 w-4 shrink-0" /> Overdue — no session in the last {{ data.summary.overdue_days }} days.
             </p>
         </section>
@@ -122,9 +122,9 @@ const destroy = () => {
                 <li v-for="s in data.sessions" :key="s.id" class="py-3 text-sm">
                     <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
                         <span class="font-semibold text-mustBlue dark:text-text-inverted">{{ date.formatDate(s.session_date) }}</span>
-                        <span class="rounded-full px-2 py-0.5 text-xs" :class="s.type === 'counselling' ? 'bg-purple-100 text-purple-800' : 'bg-sky-100 text-sky-800'">{{ s.type_label }}</span>
+                        <span class="rounded-full px-2 py-0.5 text-xs" :class="s.type === 'counselling' ? 'bg-gray-100 text-gray-700' : 'bg-yl-gold/15 text-amber-800'">{{ s.type_label }}</span>
                         <span class="text-text-muted">{{ s.mentor ?? 'No mentor' }}</span>
-                        <span v-if="s.follow_up_needed" class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">Follow-up needed</span>
+                        <span v-if="s.follow_up_needed" class="rounded-full bg-yl-gold/15 px-2 py-0.5 text-xs font-medium text-amber-800">Follow-up needed</span>
                         <span class="ml-auto flex items-center gap-3">
                             <button v-if="canManage && s.can_edit" type="button" class="action-icon" :aria-label="`Edit session on ${s.session_date}`" @click="openSession(s)">
                                 <SquarePen class="h-4 w-4" />

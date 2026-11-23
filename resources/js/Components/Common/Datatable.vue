@@ -3,53 +3,57 @@
  <!-- eslint-disable prettier/prettier -->
 <template>
     <div
-        class="overflow-hidden rounded-lg bg-background-card shadow transition-colors duration-200 dark:bg-background-dark-card">
+        class="surface overflow-hidden rounded-2xl transition-colors duration-200">
         <!-- Search and Filters -->
         <div
-            class="border-b border-mustBorder-light bg-background-card p-3 transition-colors duration-200 dark:border-mustBorder-dark dark:bg-background-dark-card sm:p-4">
-            <div class="flex flex-col gap-3 sm:gap-4">
-                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div class="flex-1 sm:max-w-xs">
-                        <!-- Search Input -->
-                        <TextInput v-model="search" class="w-full" placeholder="Search..." />
-                    </div>
-
-                    <!-- Filter and Per Page - Stack on mobile, inline on desktop -->
-                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4">
-                    <button v-if="hasActiveFilters" @click="resetFilters"
-                        class="btn-outline self-start whitespace-nowrap sm:self-auto">
-                        Reset Filters
-                    </button>
-                    <!-- Dynamic Filters -->
-                    <div class="flex flex-col gap-3 sm:flex-row sm:gap-4">
-                        <div v-for="(filterConfig, filterKey) in filtersConfig" :key="filterKey"
-                            class="min-w-0 flex-1 sm:flex-initial">
-                            <select v-if="filterConfig.component === 'select'" v-model="filterValues[filterKey]"
-                                class="text-input w-full">
-                                <option :value="''">
-                                    All {{ filterConfig.label || filterKey }}
-                                </option>
-                                <option v-for="option in filterConfig.options" :key="option.value || option"
-                                    :value="option.value || option">
-                                    {{ option.label || option }}
-                                </option>
-                            </select>
-                            <TextInput v-else v-model="filterValues[filterKey]" :placeholder="filterConfig.placeholder ||
-                                `Filter by ${filterKey}`
-                                " class="text-input w-full" />
-                        </div>
-                    </div>
-
-                    <!-- Items Per Page -->
-                    <div class="sm:min-w-max">
-                        <select v-model="perPage" class="text-input w-full sm:w-auto">
-                            <option v-for="option in perPageOptions" :value="option" :key="option">
-                                {{ option }} per page
-                            </option>
-                        </select>
-                    </div>
+            class="border-b border-mustBorder-light bg-transparent p-3 transition-colors duration-200 dark:border-mustBorder-dark dark:bg-transparent sm:p-4">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex-1 sm:max-w-xs">
+                    <!-- Search Input -->
+                    <TextInput v-model="search" class="w-full" placeholder="Search..." aria-label="Search" />
                 </div>
 
+                <div class="flex items-center gap-2 self-end sm:self-auto">
+                    <button v-if="hasActiveFilters" type="button" @click="resetFilters"
+                        class="whitespace-nowrap text-sm font-medium text-text-muted hover:text-mustGreen hover:underline">
+                        Reset filters
+                    </button>
+                    <!-- Opens the filter row below -->
+                    <button v-if="hasFilters" type="button" @click="filtersOpen = !filtersOpen"
+                        class="btn-outline inline-flex items-center gap-2 whitespace-nowrap"
+                        :class="{ '!border-mustGreen !text-mustGreen': filtersOpen || activeFilterCount }"
+                        :aria-expanded="filtersOpen ? 'true' : 'false'" aria-controls="datatable-filters">
+                        <SlidersHorizontal class="h-4 w-4" aria-hidden="true" />
+                        Filter
+                        <span v-if="activeFilterCount"
+                            class="rounded-full bg-mustGreen px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
+                            {{ activeFilterCount }}
+                        </span>
+                        <ChevronDown class="h-4 w-4 transition-transform" :class="{ 'rotate-180': filtersOpen }" aria-hidden="true" />
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filter row -->
+            <div v-if="hasFilters" v-show="filtersOpen" id="datatable-filters"
+                class="mt-3 grid gap-3 border-t border-mustBorder-light pt-3 dark:border-mustBorder-dark sm:grid-cols-2 lg:grid-cols-4">
+                <div v-for="(filterConfig, filterKey) in filtersConfig" :key="filterKey" class="min-w-0">
+                    <label :for="`dt-filter-${filterKey}`"
+                        class="mb-1 block text-xs font-medium uppercase tracking-wider text-text-muted">
+                        {{ filterConfig.label || filterKey }}
+                    </label>
+                    <select v-if="filterConfig.component === 'select'" :id="`dt-filter-${filterKey}`"
+                        v-model="filterValues[filterKey]" class="text-input w-full">
+                        <option :value="''">
+                            {{ filterConfig.placeholder || `All ${(filterConfig.label || filterKey).toLowerCase()}` }}
+                        </option>
+                        <option v-for="option in filterConfig.options" :key="option.value || option"
+                            :value="option.value || option">
+                            {{ option.label || option }}
+                        </option>
+                    </select>
+                    <TextInput v-else :id="`dt-filter-${filterKey}`" v-model="filterValues[filterKey]"
+                        :placeholder="filterConfig.placeholder || `Filter by ${filterKey}`" class="text-input w-full" />
                 </div>
             </div>
         </div>
@@ -57,12 +61,12 @@
         <!-- Table - Desktop View -->
         <div class="hidden overflow-x-auto md:block">
             <table class="min-w-full divide-y divide-mustBorder-light dark:divide-mustBorder-dark">
-                <thead class="bg-background-card transition-colors duration-200 dark:bg-background-dark-card">
+                <thead class="bg-transparent transition-colors duration-200 dark:bg-transparent">
                     <tr>
                         <th v-for="column in columns" :key="column.key" scope="col"
                             class="cursor-pointer px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-text-base transition-colors duration-200 dark:text-text-inverted lg:px-6"
                             @click="sort(column.key)" :class="{
-                                'bg-background-card dark:bg-background-dark-card':
+                                'bg-transparent':
                                     sortBy === column.key,
                             }">
                             <div class="flex items-center">
@@ -80,18 +84,18 @@
                             </div>
                         </th>
                         <th v-if="$slots.actions"
-                            class="bg-background-card px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-text-base transition-colors duration-200 dark:bg-background-dark-card dark:text-text-inverted lg:px-6">
+                            class="bg-transparent px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-text-base transition-colors duration-200 dark:bg-transparent dark:text-text-inverted lg:px-6">
                             Actions
                         </th>
                     </tr>
                 </thead>
                 <tbody
-                    class="divide-y divide-mustBorder-light bg-background-card transition-colors duration-200 dark:divide-mustBorder-dark dark:bg-background-dark-card">
+                    class="divide-y divide-mustBorder-light bg-transparent transition-colors duration-200 dark:divide-mustBorder-dark dark:bg-transparent">
                     <template v-if="pageData.length > 0">
                         <tr v-for="(item, index) in pageData" :key="item.id"
-                            class="transition-colors duration-200 hover:bg-background-soft dark:hover:bg-background-dark-soft"
+                            class="transition-colors duration-200 hover:bg-gray-50 dark:hover:bg-white/5"
                             :class="{
-                                'bg-background-soft dark:bg-background-dark-soft':
+                                'bg-gray-50/60 dark:bg-white/[0.02]':
                                     index % 2 === 0,
                             }">
                             <td v-for="column in columns" :key="column.key"
@@ -130,9 +134,9 @@
             <template v-if="pageData.length > 0">
                 <div class="divide-y divide-mustBorder-light dark:divide-mustBorder-dark">
                     <div v-for="(item, index) in pageData" :key="item.id"
-                        class="p-4 transition-colors duration-200 hover:bg-background-soft dark:hover:bg-background-dark-soft"
+                        class="p-4 transition-colors duration-200 hover:bg-gray-50 dark:hover:bg-white/5"
                         :class="{
-                            'bg-background-soft dark:bg-background-dark-soft':
+                            'bg-gray-50/60 dark:bg-white/[0.02]':
                                 index % 2 === 0,
                         }">
                         <!-- Mobile Card Content -->
@@ -175,7 +179,15 @@
 
         <!-- Pagination -->
         <div
-            class="flex flex-col gap-3 border-t border-mustBorder-light bg-background-card px-3 py-3 transition-colors duration-200 dark:border-mustBorder-dark dark:bg-background-dark-card sm:flex-row sm:items-center sm:justify-between sm:px-4">
+            class="flex flex-col gap-3 border-t border-mustBorder-light bg-transparent px-3 py-3 transition-colors duration-200 dark:border-mustBorder-dark dark:bg-transparent sm:flex-row sm:items-center sm:justify-between sm:px-4">
+            <div class="flex flex-col items-center gap-3 sm:flex-row">
+            <!-- Items Per Page -->
+            <label class="sr-only" for="datatable-per-page">Rows per page</label>
+            <select id="datatable-per-page" v-model="perPage" class="text-input !py-1.5 w-auto">
+                <option v-for="option in perPageOptions" :value="option" :key="option">
+                    {{ option }} per page
+                </option>
+            </select>
             <div
                 class="text-center text-xs text-text-base transition-colors duration-200 dark:text-text-dark-muted sm:text-left sm:text-sm">
                 Showing
@@ -189,6 +201,7 @@
                     meta.total?.toLocaleString()
                     }}</span>
                 results
+            </div>
             </div>
             <div class="flex justify-center sm:justify-end">
                 <Pagination @goToPage="goToPage" :links="props.serverSide ? meta.links : clientPaginationLinks
@@ -204,6 +217,7 @@ import { router } from '@inertiajs/vue3';
 import TextInput from '@/Components/FormElements/TextInput.vue';
 import NoRecordFound from '@/Components/Common/NoRecordFound.vue';
 import Pagination from '@/Components/Common/Pagination.vue';
+import { ChevronDown, SlidersHorizontal } from 'lucide-vue-next';
 
 const props = defineProps({
     data: Object,
@@ -269,12 +283,19 @@ const formatLinks = (links) => {
     }));
 };
 
-// Initialize filter values with empty strings for each filter
+// Start from the filters already in the URL (so they survive a page reload).
 const filterValues = ref(
     Object.fromEntries(
-        Object.keys(props.filtersConfig || {}).map((key) => [key, '']),
+        Object.keys(props.filtersConfig || {}).map((key) => [key, props.filters?.[key] ?? '']),
     ),
 );
+
+const hasFilters = computed(() => Object.keys(props.filtersConfig || {}).length > 0);
+const activeFilterCount = computed(
+    () => Object.values(filterValues.value).filter((val) => val !== '' && val !== null).length,
+);
+// The filter row starts open when a filter is already applied.
+const filtersOpen = ref(activeFilterCount.value > 0);
 
 // Compute if we have active filters
 const hasActiveFilters = computed(() => {

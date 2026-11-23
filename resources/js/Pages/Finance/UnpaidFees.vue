@@ -3,7 +3,7 @@ import SelectInput from '@/Components/FormElements/SelectInput.vue';
 import { formatMoney } from '@/Helpers/money';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { CircleCheck, Download } from 'lucide-vue-next';
+import { CircleCheck, Download, Eye } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 
 const props = defineProps({
@@ -35,7 +35,7 @@ const exportUrl = computed(() => route('finance.unpaid.export', props.termId ? {
             <div>
                 <h1 class="page-heading !mb-1">Unpaid fees</h1>
                 <p class="text-sm text-text-muted dark:text-text-dark-muted">
-                    Approved fees Youthline still has to pay. Payments awaiting approval don't count until an Admin approves them.
+                    Approved fees Youthline still has to pay.
                 </p>
             </div>
             <div class="flex flex-wrap items-end gap-3">
@@ -99,12 +99,13 @@ const exportUrl = computed(() => route('finance.unpaid.export', props.termId ? {
                             <th class="px-3 py-2 text-right">Youthline share</th>
                             <th class="px-3 py-2 text-right">Paid</th>
                             <th class="px-3 py-2 text-right">Balance</th>
+                            <th class="px-3 py-2 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="row in students" :key="row.student_id" class="border-b border-mustBorder-light last:border-0 dark:border-mustBorder-dark">
                             <td class="px-3 py-2">
-                                <Link :href="route('students.show', row.student_id) + '#academics'" class="font-medium text-mustGreen hover:underline">{{ row.student }}</Link>
+                                <span class="font-medium text-mustBlue dark:text-text-inverted">{{ row.student }}</span>
                                 <span class="block text-xs text-text-muted">{{ row.student_status }}</span>
                             </td>
                             <td class="px-3 py-2 text-text-muted">{{ row.schools.join(', ') || '—' }}</td>
@@ -112,9 +113,18 @@ const exportUrl = computed(() => route('finance.unpaid.export', props.termId ? {
                             <td class="px-3 py-2 text-right">{{ money(row.share) }}</td>
                             <td class="px-3 py-2 text-right">
                                 {{ money(row.paid) }}
-                                <span v-if="row.awaiting_approval" class="block text-xs text-amber-700">+ {{ money(row.awaiting_approval) }} awaiting approval</span>
                             </td>
                             <td class="px-3 py-2 text-right font-semibold text-red-700">{{ money(row.balance) }}</td>
+                            <td class="px-3 py-2 text-right">
+                                <Link
+                                    :href="route('students.show', row.student_id) + '#academics'"
+                                    class="action-icon inline-flex"
+                                    :aria-label="`View fees for ${row.student}`"
+                                    title="View"
+                                >
+                                    <Eye class="h-[19px] w-[19px]" />
+                                </Link>
+                            </td>
                         </tr>
                     </tbody>
                 </table>

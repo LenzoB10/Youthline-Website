@@ -1,11 +1,11 @@
 <script setup>
+import BackLink from '@/Components/Common/BackLink.vue';
 import InputError from '@/Components/FormElements/InputError.vue';
 import InputLabel from '@/Components/FormElements/InputLabel.vue';
 import TextArea from '@/Components/FormElements/TextArea.vue';
 import TextInput from '@/Components/FormElements/TextInput.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ArrowLeft } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 const props = defineProps({
@@ -35,9 +35,7 @@ const submit = () => {
     <Head :title="isEdit ? 'Edit member' : 'New member'" />
 
     <AuthenticatedLayout>
-        <Link :href="route('admin.website.team.index')" class="mb-4 inline-flex items-center gap-1 text-sm text-mustBlue dark:text-text-dark-muted">
-            <ArrowLeft class="h-4 w-4" /> All team members
-        </Link>
+        <BackLink :href="route('admin.website.team.index')">All team members</BackLink>
         <h1 class="page-heading">{{ isEdit ? 'Edit member' : 'New member' }}</h1>
 
         <form class="card-container max-w-2xl" @submit.prevent="submit">

@@ -74,7 +74,7 @@ const submit = () =>
                         class="mt-1 block w-full"
                         :disabled="!canEdit"
                     />
-                    <p v-else class="mt-1 rounded-lg bg-amber-50 p-2 text-xs text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">
+                    <p v-else class="mt-1 rounded-lg bg-yl-gold/10 p-2 text-xs text-amber-800 dark:bg-yl-gold/10 dark:text-yl-gold">
                         Upload the signed form under Documents with the type <strong>Consent form</strong> first.
                     </p>
                     <InputError class="mt-2" :message="form.errors.document_id" />

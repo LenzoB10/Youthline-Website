@@ -9,7 +9,6 @@ use App\Models\Fee;
 use App\Models\HomeVisit;
 use App\Models\MentorshipSession;
 use App\Models\Payment;
-use App\Models\RepairProject;
 use App\Models\Student;
 use App\Services\Academics\GradeTrendService;
 use App\Services\Dashboard\OrganisationOverviewService;
@@ -52,10 +51,8 @@ class DashboardController extends Controller
                 'paused' => Student::query()->where('status', StudentStatus::Paused->value)->count(),
             ] : null,
             'fees' => $user->can('manage fees') ? $this->balances->totals() : null,
-            'approvals' => $user->can('approve payments') || $user->can('approve repairs') ? [
-                'payments' => $user->can('approve payments') ? Payment::query()->pendingApproval()->count() : 0,
-                'scholarships' => $user->can('approve payments') ? Fee::query()->where('approval_status', FeeApproval::Pending->value)->count() : 0,
-                'repairs' => $user->can('approve repairs') ? RepairProject::query()->where('approval_status', FeeApproval::Pending->value)->count() : 0,
+            'approvals' => $user->can('approve payments') ? [
+                'scholarships' => Fee::query()->where('approval_status', FeeApproval::Pending->value)->count(),
             ] : null,
             'reminders' => [
                 'mentorship' => $user->can('manage mentorship') ? $this->mentorship->overdueStudents()->take(8)->values() : null,
@@ -69,6 +66,7 @@ class DashboardController extends Controller
             ],
             'gradeDrops' => $user->can('record results') ? $this->trends->currentDrops(8) : null,
             'thisMonth' => $user->can('list students') ? $this->thisMonth() : null,
+            'trend' => $user->can('manage fees') || $user->can('view organisation overview') ? $this->overview->monthlySupport(12) : null,
             'overview' => $user->can('view organisation overview') ? $this->organisation($request->integer('year') ?: null) : null,
             'gradeDropThreshold' => $this->settings->gradeDropThreshold(),
         ]);

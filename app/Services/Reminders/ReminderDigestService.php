@@ -4,8 +4,6 @@ namespace App\Services\Reminders;
 
 use App\Enums\FeeApproval;
 use App\Models\Fee;
-use App\Models\Payment;
-use App\Models\RepairProject;
 use App\Models\User;
 use App\Notifications\DailyReminderDigest;
 use App\Services\Academics\GradeTrendService;
@@ -61,10 +59,8 @@ class ReminderDigestService
         if ($user->can('manage businesses')) {
             $add($this->remember('checkins', fn () => $this->businesses->checkinsDue()->count()), 'business is due a check-in', 'businesses are due a check-in', 'support.businesses');
         }
-        if ($user->can('approve payments') || $user->can('approve repairs')) {
-            $pending = ($user->can('approve payments') ? $this->remember('pendingFinance', fn () => Payment::query()->pendingApproval()->count()
-                + Fee::query()->where('approval_status', FeeApproval::Pending->value)->count()) : 0)
-                + ($user->can('approve repairs') ? $this->remember('pendingRepairs', fn () => RepairProject::query()->where('approval_status', FeeApproval::Pending->value)->count()) : 0);
+        if ($user->can('approve payments')) {
+            $pending = $this->remember('pendingFinance', fn () => Fee::query()->where('approval_status', FeeApproval::Pending->value)->count());
             $add($pending, 'item is waiting for your approval', 'items are waiting for your approval', 'finance.approvals.index');
         }
 

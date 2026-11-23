@@ -22,8 +22,8 @@ class SystemSettingController extends Controller
         return Inertia::render('Admin/Settings/Approvals', [
             'settings' => [
                 ...$settings->only([
-                    'currency', 'require_payment_approval', 'payment_approval_limit',
-                    'require_scholarship_approval', 'require_repair_approval', 'repair_approval_limit',
+                    'currency',
+                    'require_scholarship_approval',
                     'counselling_notes_visibility', 'grade_drop_threshold',
                     'mentorship_overdue_days', 'home_visit_interval_months', 'business_checkin_days',
                 ]),

@@ -7,14 +7,9 @@ use App\Enums\PaymentStatus;
 use App\Models\Fee;
 use App\Models\Payment;
 use App\Models\User;
-use App\Notifications\ApprovalDecided;
-use App\Notifications\PaymentAwaitingApproval;
-use App\Services\Notifications\AlertRecipients;
-use App\Services\Settings\SystemSettingsService;
 use App\Services\Students\StudentDocumentService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -23,11 +18,7 @@ use Illuminate\Validation\ValidationException;
  */
 class PaymentService
 {
-    public function __construct(
-        protected SystemSettingsService $settings,
-        protected StudentDocumentService $documents,
-        protected AlertRecipients $recipients,
-    ) {}
+    public function __construct(protected StudentDocumentService $documents) {}
 
     /**
      * @param  array<string, mixed>  $data  validated PaymentRequest data
@@ -40,10 +31,7 @@ class PaymentService
             ]);
         }
 
-        $overLimit = $this->settings->paymentNeedsApproval($data['amount']);
-        $waits = $overLimit && ! $by->can('approve payments');
-
-        $payment = DB::transaction(fn () => Payment::create([
+        return DB::transaction(fn () => Payment::create([
             'fee_id' => $fee->id,
             'amount' => $data['amount'],
             'paid_on' => $data['paid_on'],
@@ -52,48 +40,10 @@ class PaymentService
             'receipt_document_id' => $receipt
                 ? $this->documents->store($fee->student, $receipt, DocumentType::Receipt, $by)->id
                 : null,
-            'status' => $waits ? PaymentStatus::PendingApproval : PaymentStatus::Paid,
-            'recorded_by' => $by->id,
-            // An Admin recording an over-limit payment approves it in the same step.
-            'approved_by' => $overLimit && ! $waits ? $by->id : null,
-            'approved_at' => $overLimit && ! $waits ? now() : null,
-        ]));
-
-        if ($waits) {
-            Notification::send(
-                $this->recipients->withPermission('approve payments', except: $by),
-                new PaymentAwaitingApproval($payment->load('fee.student', 'recorder')),
-            );
-        }
-
-        return $payment;
-    }
-
-    public function approve(Payment $payment, User $admin): void
-    {
-        $this->ensurePending($payment);
-
-        $payment->update([
+            // Every payment counts as soon as it is recorded — no approval step.
             'status' => PaymentStatus::Paid,
-            'approved_by' => $admin->id,
-            'approved_at' => now(),
-        ]);
-
-        $this->tellRecorder($payment, true, $admin);
-    }
-
-    public function reject(Payment $payment, User $admin, string $reason): void
-    {
-        $this->ensurePending($payment);
-
-        $payment->update([
-            'status' => PaymentStatus::Rejected,
-            'approved_by' => $admin->id,
-            'approved_at' => now(),
-            'rejection_reason' => $reason,
-        ]);
-
-        $this->tellRecorder($payment, false, $admin, $reason);
+            'recorded_by' => $by->id,
+        ]));
     }
 
     public function markError(Payment $payment, User $by, string $reason): void
@@ -108,30 +58,5 @@ class PaymentService
             'error_marked_by' => $by->id,
             'error_marked_at' => now(),
         ]);
-    }
-
-    protected function ensurePending(Payment $payment): void
-    {
-        if ($payment->status !== PaymentStatus::PendingApproval) {
-            throw ValidationException::withMessages(['payment' => 'This payment has already been decided.']);
-        }
-    }
-
-    protected function tellRecorder(Payment $payment, bool $approved, User $admin, ?string $reason = null): void
-    {
-        $payment->loadMissing('recorder', 'fee.student');
-
-        if (! $payment->recorder || $payment->recorder->is($admin)) {
-            return;
-        }
-
-        $currency = $this->settings->get()->currency;
-        $payment->recorder->notify(new ApprovalDecided(
-            "The payment of {$currency} ".number_format((float) $payment->amount, 2)." for {$payment->fee->student->full_name}",
-            $approved,
-            $admin->name,
-            $reason,
-            $payment->fee->student_id,
-        ));
     }
 }

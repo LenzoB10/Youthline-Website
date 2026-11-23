@@ -13,7 +13,16 @@ const typeOptions = [
     { value: 'donor', label: 'Donor' },
 ];
 
-const form = useForm({ name: '', email: '', phone: '', type: '', message: '', company: '' });
+// "Ways to help" on the home page links here with ?type=sponsor (etc.) to pre-select the option.
+const requested = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('type') : null;
+const form = useForm({
+    name: '',
+    email: '',
+    phone: '',
+    type: typeOptions.some((option) => option.value === requested) ? requested : '',
+    message: '',
+    company: '',
+});
 
 const submit = () => {
     form.post(route('involvement.store'), {
@@ -34,7 +43,7 @@ const submit = () => {
                 <!-- Ways to help -->
                 <div v-reveal:left>
                     <div class="flex items-start gap-4">
-                        <span class="flex h-11 w-11 shrink-0 items-center justify-center bg-yl-green/10 text-yl-green">
+                        <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-yl-green/10 text-yl-green">
                             <Users class="h-5 w-5" />
                         </span>
                         <div>
@@ -46,7 +55,7 @@ const submit = () => {
                         </div>
                     </div>
                     <div class="mt-8 flex items-start gap-4">
-                        <span class="flex h-11 w-11 shrink-0 items-center justify-center bg-yl-gold/15 text-yl-gold">
+                        <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-yl-gold/15 text-yl-gold">
                             <Heart class="h-5 w-5" />
                         </span>
                         <div>
@@ -61,7 +70,7 @@ const submit = () => {
                 </div>
 
                 <!-- Form -->
-                <form v-reveal:right class="yl-form-card" @submit.prevent="submit">
+                <form id="involve" v-reveal:right class="yl-form-card scroll-mt-28" @submit.prevent="submit">
                     <!-- Spam trap: hidden from people, filled in by bots -->
                     <input v-model="form.company" type="text" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true" />
 

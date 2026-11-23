@@ -152,7 +152,7 @@ class FeeService
             $approved,
             $admin->name,
             $reason,
-            $fee->student_id,
+            route('students.show', $fee->student_id).'#academics',
         ));
     }
 }

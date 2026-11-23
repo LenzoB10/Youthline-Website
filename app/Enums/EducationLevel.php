@@ -25,6 +25,14 @@ enum EducationLevel: string
         return ($stage === 'form' ? 'Form ' : 'Year ').$number;
     }
 
+    /**
+     * Only students in the final years of university (Year 4 or Year 5) can graduate.
+     */
+    public function canGraduate(): bool
+    {
+        return in_array($this, [self::Year4, self::Year5], true);
+    }
+
     public function stage(): string
     {
         return str_starts_with($this->value, 'form') ? 'secondary' : 'tertiary';

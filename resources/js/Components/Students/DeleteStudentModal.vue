@@ -18,7 +18,7 @@ const form = useForm({ confirm_name: '' });
 watch(() => props.show, () => form.reset());
 
 const close = () => emit('close');
-const submit = () => form.delete(route('students.destroy', props.student.id));
+const submit = () => form.delete(route('students.destroy', props.student.id), { onSuccess: close });
 </script>
 
 <template>

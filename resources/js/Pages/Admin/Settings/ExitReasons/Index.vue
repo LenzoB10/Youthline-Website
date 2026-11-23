@@ -1,4 +1,5 @@
 <script setup>
+import BackLink from '@/Components/Common/BackLink.vue';
 import DataTable from '@/Components/Common/Datatable.vue';
 import ConfirmationModal from '@/Components/Common/Modal/ConfirmationModal.vue';
 import Modal from '@/Components/Common/Modal/Modal.vue';
@@ -10,7 +11,7 @@ import TextArea from '@/Components/FormElements/TextArea.vue';
 import TextInput from '@/Components/FormElements/TextInput.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
-import { ArrowLeft, Plus, SquarePen, Trash2 } from 'lucide-vue-next';
+import { Plus, SquarePen, Trash2 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
 defineProps({
@@ -62,9 +63,7 @@ const destroy = () => {
     <Head title="Exit Reasons" />
 
     <AuthenticatedLayout>
-        <Link :href="route('admin.settings.index')" class="mb-4 inline-flex items-center gap-1 text-sm text-mustBlue dark:text-text-dark-muted">
-            <ArrowLeft class="h-4 w-4" /> Settings
-        </Link>
+        <BackLink :href="route('admin.settings.index')">Settings</BackLink>
         <div class="flex items-center justify-between">
             <h1 class="page-heading">Exit Reasons</h1>
             <button type="button" class="btn-primary-sm inline-flex items-center gap-1" @click="openForm()">
@@ -107,7 +106,7 @@ const destroy = () => {
             <template #column-is_active="{ item }">
                 <span
                     class="rounded-full px-2 py-1 text-xs font-medium"
-                    :class="item.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'"
+                    :class="item.is_active ? 'bg-mustGreen/15 text-yl-green-deep' : 'bg-gray-100 text-gray-600'"
                 >
                     {{ item.is_active ? 'Active' : 'Inactive' }}
                 </span>

@@ -1,11 +1,11 @@
 <script setup>
+import BackLink from '@/Components/Common/BackLink.vue';
 import InputError from '@/Components/FormElements/InputError.vue';
 import InputLabel from '@/Components/FormElements/InputLabel.vue';
 import TextArea from '@/Components/FormElements/TextArea.vue';
 import TextInput from '@/Components/FormElements/TextInput.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ArrowLeft } from 'lucide-vue-next';
 
 const props = defineProps({
     page: { type: Object, required: true },
@@ -24,9 +24,7 @@ const submit = () => form.put(route('admin.website.pages.update', props.page.id)
     <Head :title="`Edit: ${page.title}`" />
 
     <AuthenticatedLayout>
-        <Link :href="route('admin.website.pages.index')" class="mb-4 inline-flex items-center gap-1 text-sm text-mustBlue dark:text-text-dark-muted">
-            <ArrowLeft class="h-4 w-4" /> All pages
-        </Link>
+        <BackLink :href="route('admin.website.pages.index')">All pages</BackLink>
         <h1 class="page-heading">Edit page</h1>
         <p class="mb-6 font-mono text-xs text-mustGreen">{{ page.key }}</p>
 

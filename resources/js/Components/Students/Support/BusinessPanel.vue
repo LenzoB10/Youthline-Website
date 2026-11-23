@@ -99,10 +99,10 @@ const runningOptions = [
                     <div>
                         <h3 class="text-base font-semibold text-mustBlue dark:text-text-inverted">
                             {{ b.name }}
-                            <span class="ml-2 rounded-full px-2 py-0.5 text-xs font-medium" :class="b.is_running ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-700'">
+                            <span class="ml-2 rounded-full px-2 py-0.5 text-xs font-medium" :class="b.is_running ? 'bg-mustGreen/15 text-yl-green-deep' : 'bg-gray-200 text-gray-700'">
                                 {{ b.is_running ? 'Running' : 'Stopped' }}
                             </span>
-                            <span v-if="b.checkin_due" class="ml-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">Check-in due</span>
+                            <span v-if="b.checkin_due" class="ml-1 rounded-full bg-yl-gold/15 px-2 py-0.5 text-xs font-medium text-amber-800">Check-in due</span>
                         </h3>
                         <p class="text-text-muted">
                             <template v-if="b.business_type">{{ b.business_type }} · </template>started {{ date.formatDate(b.start_date) }}

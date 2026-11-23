@@ -74,7 +74,7 @@ const hasNotifications = computed(() => props.notifications.length > 0);
         </div>
 
         <!-- Notifications List -->
-        <div class="overflow-hidden rounded-lg border border-mustBorder-light bg-background-card dark:border-mustBorder-dark dark:bg-background-dark-card">
+        <div class="surface overflow-hidden rounded-2xl">
             <!-- Notifications -->
             <div>
                 <div
@@ -82,7 +82,7 @@ const hasNotifications = computed(() => props.notifications.length > 0);
                     :key="notification.id"
                     class="flex items-center px-4 py-3 transition-colors border-b border-mustBorder-light dark:border-mustBorder-dark cursor-pointer group"
                     :class="[
-                        notification.read ? 'bg-background-card dark:bg-background-dark-card' : 'bg-background-soft dark:bg-background-dark-soft',
+                        notification.read ? 'bg-transparent' : 'bg-mustGreen/5 dark:bg-white/5',
                         'hover:bg-accent/10 dark:hover:bg-accent/20',
                     ]"
                 >

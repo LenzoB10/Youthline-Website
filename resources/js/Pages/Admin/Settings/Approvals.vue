@@ -1,4 +1,5 @@
 <script setup>
+import BackLink from '@/Components/Common/BackLink.vue';
 import Checkbox from '@/Components/FormElements/Checkbox.vue';
 import InputError from '@/Components/FormElements/InputError.vue';
 import InputLabel from '@/Components/FormElements/InputLabel.vue';
@@ -6,7 +7,6 @@ import TextInput from '@/Components/FormElements/TextInput.vue';
 import { date } from '@/Helpers';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ArrowLeft } from 'lucide-vue-next';
 
 const props = defineProps({
     settings: { type: Object, required: true },
@@ -14,11 +14,7 @@ const props = defineProps({
 
 const form = useForm({
     currency: props.settings.currency,
-    require_payment_approval: props.settings.require_payment_approval,
-    payment_approval_limit: props.settings.payment_approval_limit,
     require_scholarship_approval: props.settings.require_scholarship_approval,
-    require_repair_approval: props.settings.require_repair_approval,
-    repair_approval_limit: props.settings.repair_approval_limit,
     counselling_notes_visibility: props.settings.counselling_notes_visibility,
     grade_drop_threshold: props.settings.grade_drop_threshold,
     mentorship_overdue_days: props.settings.mentorship_overdue_days,
@@ -49,55 +45,31 @@ const visibilityOptions = [
     <Head title="Approvals & Policies" />
 
     <AuthenticatedLayout>
-        <Link :href="route('admin.settings.index')" class="mb-4 inline-flex items-center gap-1 text-sm text-mustBlue dark:text-text-dark-muted">
-            <ArrowLeft class="h-4 w-4" /> Settings
-        </Link>
+        <BackLink :href="route('admin.settings.index')">Settings</BackLink>
         <h1 class="page-heading">Approvals & Policies</h1>
         <p class="mb-6 text-sm text-text-muted dark:text-text-dark-muted">
-            Decide what needs Admin sign-off. These rules apply to payments, scholarships and repairs
-            recorded by managers.
+            Decide what needs Admin sign-off. These rules apply to scholarships recorded by
+            managers. Payments are recorded straight away, without approval.
             <span v-if="settings.updated_by">
                 Last changed by {{ settings.updated_by }} on {{ date.formatDate(settings.updated_at) }}.
             </span>
         </p>
 
         <form class="max-w-3xl space-y-6" @submit.prevent="submit">
-            <!-- Payments -->
+            <!-- Currency -->
             <section class="card-container">
-                <h2 class="page-heading-2 !mb-1">Payments</h2>
-                <p class="mb-4 text-sm text-text-muted">
-                    Payments above the limit start as <em>pending approval</em> until an Admin approves them.
-                </p>
-                <label class="mb-4 flex items-center gap-2 text-sm">
-                    <Checkbox v-model="form.require_payment_approval" />
-                    Require Admin approval for large payments
-                </label>
-                <div class="grid gap-4 sm:grid-cols-[8rem_1fr]">
-                    <div>
-                        <InputLabel for="currency" value="Currency" />
-                        <TextInput id="currency" v-model="form.currency" maxlength="3" class="mt-1 block w-full uppercase" required />
-                        <InputError class="mt-2" :message="form.errors.currency" />
-                    </div>
-                    <div>
-                        <InputLabel for="payment_limit" value="Approval needed above" />
-                        <TextInput
-                            id="payment_limit"
-                            v-model="form.payment_approval_limit"
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            class="mt-1 block w-full"
-                            :disabled="!form.require_payment_approval"
-                            required
-                        />
-                        <InputError class="mt-2" :message="form.errors.payment_approval_limit" />
-                    </div>
+                <h2 class="page-heading-2 !mb-1">Currency</h2>
+                <p class="mb-4 text-sm text-text-muted">Used for fees, payments, support and reports.</p>
+                <div class="max-w-[8rem]">
+                    <InputLabel for="currency" value="Currency" />
+                    <TextInput id="currency" v-model="form.currency" maxlength="3" class="mt-1 block w-full uppercase" required />
+                    <InputError class="mt-2" :message="form.errors.currency" />
                 </div>
             </section>
 
-            <!-- Scholarships & repairs -->
+            <!-- Scholarships -->
             <section class="card-container">
-                <h2 class="page-heading-2 !mb-1">Scholarships and home repairs</h2>
+                <h2 class="page-heading-2 !mb-1">Scholarships</h2>
                 <label class="mt-3 flex items-start gap-2 text-sm">
                     <Checkbox v-model="form.require_scholarship_approval" class="mt-0.5" />
                     <span>
@@ -105,24 +77,6 @@ const visibilityOptions = [
                         <span class="block text-text-muted">A new scholarship commits funds for years, so a second check is advised.</span>
                     </span>
                 </label>
-                <label class="mt-4 flex items-start gap-2 text-sm">
-                    <Checkbox v-model="form.require_repair_approval" class="mt-0.5" />
-                    <span>Require Admin approval for large repair budgets</span>
-                </label>
-                <div class="mt-3 max-w-xs">
-                    <InputLabel for="repair_limit" :value="`Approval needed above (${form.currency})`" />
-                    <TextInput
-                        id="repair_limit"
-                        v-model="form.repair_approval_limit"
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        class="mt-1 block w-full"
-                        :disabled="!form.require_repair_approval"
-                        required
-                    />
-                    <InputError class="mt-2" :message="form.errors.repair_approval_limit" />
-                </div>
             </section>
 
             <!-- Academic alerts -->

@@ -41,7 +41,7 @@ const paragraphs = computed(() =>
                     v-if="post.image"
                     :src="post.image"
                     :alt="post.title"
-                    class="mt-8 h-64 w-full object-cover object-[center_35%] sm:h-80 lg:h-[26rem]"
+                    class="mt-8 h-64 w-full rounded-md object-cover object-[center_35%] sm:h-80 lg:h-[26rem]"
                 />
 
                 <div class="mt-8">

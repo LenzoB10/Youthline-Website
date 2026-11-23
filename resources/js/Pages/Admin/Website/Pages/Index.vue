@@ -1,7 +1,8 @@
 <script setup>
+import BackLink from '@/Components/Common/BackLink.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { ArrowLeft, SquarePen } from 'lucide-vue-next';
+import { SquarePen } from 'lucide-vue-next';
 
 defineProps({
     pages: { type: Array, default: () => [] },
@@ -12,9 +13,7 @@ defineProps({
     <Head title="Pages" />
 
     <AuthenticatedLayout>
-        <Link :href="route('admin.website.index')" class="mb-4 inline-flex items-center gap-1 text-sm text-mustBlue dark:text-text-dark-muted">
-            <ArrowLeft class="h-4 w-4" /> Website content
-        </Link>
+        <BackLink :href="route('admin.website.index')">Website content</BackLink>
         <h1 class="page-heading">Pages</h1>
         <p class="mb-6 text-sm text-text-muted dark:text-text-dark-muted">
             Edit the text shown on each public page. Keys like <strong>vision</strong>,

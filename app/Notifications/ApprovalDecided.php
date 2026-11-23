@@ -6,7 +6,7 @@ use App\Notifications\Concerns\InAppAlert;
 use Illuminate\Notifications\Notification;
 
 /**
- * Tells the manager who recorded a payment or scholarship what the Admin decided.
+ * Tells the manager who recorded a scholarship what the Admin decided.
  */
 class ApprovalDecided extends Notification
 {
@@ -20,8 +20,7 @@ class ApprovalDecided extends Notification
         public bool $approved,
         public string $decidedBy,
         public ?string $reason,
-        public int $studentId,
-        public string $anchor = '#academics',
+        public string $link,
     ) {}
 
     protected function title(): string
@@ -47,7 +46,7 @@ class ApprovalDecided extends Notification
 
     protected function url(): ?string
     {
-        return route('students.show', $this->studentId).$this->anchor;
+        return $this->link;
     }
 
     protected function kind(): string

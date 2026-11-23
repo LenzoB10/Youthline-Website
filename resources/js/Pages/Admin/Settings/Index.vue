@@ -49,7 +49,7 @@ const cards = computed(() => [
     },
     {
         name: 'Approvals & Policies',
-        description: 'Payment and repair limits, approvals, and counselling-note privacy.',
+        description: 'Scholarship approvals, reminders and counselling-note privacy.',
         icon: ShieldCheck,
         route: 'admin.settings.approvals.edit',
         meta: null,

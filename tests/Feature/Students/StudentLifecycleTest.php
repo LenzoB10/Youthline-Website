@@ -57,20 +57,75 @@ it('requires an active exit reason whenever a student leaves', function () {
         ->and($student->exit_date->toDateString())->toBe('2026-03-01');
 });
 
-it('rejects status changes that skip the lifecycle', function () {
-    $applicant = makeLearner('applicant');
+it('offers every other status so a mistake can be corrected, but not the same status again', function () {
+    expect(StudentStatus::Graduated->allowedTransitions())->toHaveCount(5)
+        ->not->toContain(StudentStatus::Graduated);
 
+    $student = makeLearner();
     actingAs($this->manager)
-        ->put(route('students.status.update', $applicant), ['status' => 'graduated', 'exit_reason' => 'Completed studies'])
+        ->put(route('students.status.update', $student), ['status' => 'active'])
         ->assertSessionHasErrors('status');
+});
 
-    expect($applicant->fresh()->status)->toBe(StudentStatus::Applicant);
+it('only lets Year 4 and Year 5 students graduate', function () {
+    $year = makeYear('2026', current: true);
+    $secondary = makeLearner(attributes: ['first_name' => 'Ada']);
+    enrol($secondary, $year, 'form_4');
+    $finalist = makeLearner(attributes: ['first_name' => 'Ben']);
+    enrol($finalist, $year, 'year_4');
+    $noLevel = makeLearner(attributes: ['first_name' => 'Cat']);
+
+    expect($secondary->availableStatuses())->not->toContain(StudentStatus::Graduated)
+        ->and($noLevel->availableStatuses())->not->toContain(StudentStatus::Graduated)
+        ->and($finalist->availableStatuses())->toContain(StudentStatus::Graduated);
+
+    // The profile only offers it where allowed...
+    actingAs($this->manager)->get(route('students.show', $secondary))
+        ->assertInertia(fn (AssertableInertia $page) => $page->where('options.transitions', fn ($t) => ! collect($t)->contains('value', 'graduated')));
+
+    // ...and the server refuses it otherwise.
+    actingAs($this->manager)
+        ->put(route('students.status.update', $secondary), ['status' => 'graduated', 'exit_reason' => 'Completed studies'])
+        ->assertSessionHasErrors(['status' => 'Only students in Year 4 or Year 5 can be marked as graduated.']);
+    actingAs($this->manager)
+        ->put(route('students.status.update', $finalist), ['status' => 'graduated', 'exit_reason' => 'Completed studies'])
+        ->assertSessionHasNoErrors();
+
+    expect($secondary->fresh()->status)->toBe(StudentStatus::Active)
+        ->and($finalist->fresh()->status)->toBe(StudentStatus::Graduated);
+});
+
+it('lets a status set by mistake be corrected, reopening the programs it closed', function () {
+    $program = Program::create(['name' => 'Mentorship', 'slug' => 'mentorship']);
+    $ended = Program::create(['name' => 'Basic needs', 'slug' => 'basic-needs']);
+    $student = makeLearner();
+    enrol($student, makeYear('2026', current: true), 'year_4');
+    StudentProgram::create(['student_id' => $student->id, 'program_id' => $program->id, 'start_date' => '2025-01-01']);
+    // A program they had already left before — must stay ended.
+    StudentProgram::create(['student_id' => $student->id, 'program_id' => $ended->id, 'start_date' => '2024-01-01', 'end_date' => '2024-12-31']);
+
+    // Marked Graduated by mistake...
+    actingAs($this->manager)
+        ->put(route('students.status.update', $student), ['status' => 'graduated', 'exit_reason' => 'Completed studies'])
+        ->assertSessionHasNoErrors();
+    expect($student->activePrograms()->count())->toBe(0);
+
+    // ...then corrected straight to Paused (not only Active).
+    actingAs($this->manager)
+        ->put(route('students.status.update', $student), ['status' => 'paused', 'exit_reason' => 'Family relocated'])
+        ->assertSessionHasNoErrors();
+
+    $student->refresh();
+    expect($student->status)->toBe(StudentStatus::Paused)
+        ->and($student->activePrograms()->pluck('programs.id')->all())->toBe([$program->id])
+        ->and(StudentProgram::query()->count())->toBe(2);
 });
 
 it('ends programs on a permanent exit but keeps them during a pause', function () {
     $program = Program::create(['name' => 'Mentorship', 'slug' => 'mentorship']);
     $paused = makeLearner();
     $graduate = makeLearner(attributes: ['first_name' => 'Tadala']);
+    enrol($graduate, makeYear('2026', current: true), 'year_5');
     foreach ([$paused, $graduate] as $student) {
         StudentProgram::create(['student_id' => $student->id, 'program_id' => $program->id, 'start_date' => '2025-01-01']);
     }

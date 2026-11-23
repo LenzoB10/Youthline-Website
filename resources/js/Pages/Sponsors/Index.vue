@@ -5,7 +5,7 @@ import { formatMoney } from '@/Helpers/money';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import SponsorForm from '@/Pages/Sponsors/Partials/SponsorForm.vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { HeartHandshake, Plus } from 'lucide-vue-next';
+import { HeartHandshake, Plus, Eye } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
 const props = defineProps({
@@ -48,17 +48,23 @@ const shown = computed(() => {
                             <th class="px-3 py-2">Contact</th>
                             <th class="px-3 py-2 text-right">Students now</th>
                             <th class="px-3 py-2 text-right">Committed per year</th>
+                            <th class="px-3 py-2 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="s in shown" :key="s.id" class="border-b border-mustBorder-light last:border-0 dark:border-mustBorder-dark">
                             <td class="px-3 py-2">
-                                <Link :href="route('sponsors.show', s.id)" class="font-medium text-mustGreen hover:underline">{{ s.name }}</Link>
+                                <span class="font-medium text-mustBlue dark:text-text-inverted">{{ s.name }}</span>
                                 <span class="block text-xs text-text-muted">{{ s.type_label }}</span>
                             </td>
                             <td class="px-3 py-2 text-text-muted">{{ [s.email, s.phone].filter(Boolean).join(' · ') || '—' }}</td>
                             <td class="px-3 py-2 text-right">{{ s.students_count }}</td>
                             <td class="px-3 py-2 text-right">{{ s.yearly_total ? money(s.yearly_total) : '—' }}</td>
+                            <td class="px-3 py-2 text-right">
+                                <Link :href="route('sponsors.show', s.id)" class="action-icon inline-flex" :aria-label="`View ${s.name}`" title="View">
+                                    <Eye class="h-[19px] w-[19px]" />
+                                </Link>
+                            </td>
                         </tr>
                     </tbody>
                 </table>

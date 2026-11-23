@@ -1,8 +1,9 @@
 <script setup>
+import BackLink from '@/Components/Common/BackLink.vue';
 import ConfirmationModal from '@/Components/Common/Modal/ConfirmationModal.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ArrowLeft, Plus, SquarePen, Trash2 } from 'lucide-vue-next';
+import { Plus, SquarePen, Trash2 } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 defineProps({
@@ -27,9 +28,7 @@ const destroy = () => {
     <Head title="Team" />
 
     <AuthenticatedLayout>
-        <Link :href="route('admin.website.index')" class="mb-4 inline-flex items-center gap-1 text-sm text-mustBlue dark:text-text-dark-muted">
-            <ArrowLeft class="h-4 w-4" /> Website content
-        </Link>
+        <BackLink :href="route('admin.website.index')">Website content</BackLink>
         <div class="mb-6 flex items-center justify-between">
             <h1 class="page-heading !mb-0">Leadership Team</h1>
             <Link :href="route('admin.website.team.create')" class="btn-primary inline-flex items-center gap-1">

@@ -197,8 +197,8 @@ const deleteBackup = () => {
                 <span
                     class="rounded-full px-2 py-0.5 text-xs font-medium"
                     :class="item.type === 'monthly'
-                        ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300'
-                        : 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'"
+                        ? 'bg-yl-gold/15 text-amber-800 dark:text-yl-gold'
+                        : 'bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-gray-300'"
                 >
                     {{ item.type === 'monthly' ? 'Monthly' : 'Daily' }}
                 </span>

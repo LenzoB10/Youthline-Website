@@ -42,7 +42,7 @@ class UnpaidFeesController extends Controller
 
         return response()->streamDownload(function () use ($rows, $currency) {
             $out = fopen('php://output', 'w');
-            fputcsv($out, ['Student', 'Status', 'School(s)', 'Term(s)', "Youthline share ({$currency})", "Paid ({$currency})", "Awaiting approval ({$currency})", "Balance ({$currency})"]);
+            fputcsv($out, ['Student', 'Status', 'School(s)', 'Term(s)', "Youthline share ({$currency})", "Paid ({$currency})", "Balance ({$currency})"]);
             foreach ($rows as $row) {
                 fputcsv($out, [
                     $this->safe($row['student']),
@@ -51,7 +51,6 @@ class UnpaidFeesController extends Controller
                     implode('; ', $row['terms']),
                     number_format($row['share'], 2, '.', ''),
                     number_format($row['paid'], 2, '.', ''),
-                    number_format($row['awaiting_approval'], 2, '.', ''),
                     number_format($row['balance'], 2, '.', ''),
                 ]);
             }

@@ -336,7 +336,7 @@ watch(isOpen, (newValue) => {
             <div v-if="isOpen && !props.disabled"
                 ref="dropdownMenu"
                 :id="id ? `${id}-dropdown` : undefined"
-                class="absolute z-50 w-full rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-600 dark:bg-background-dark-soft"
+                class="absolute z-50 w-full surface-raised rounded-xl"
                 :class="{
                     'mt-1': !props.multiple,
                     'mt-0.5': props.multiple

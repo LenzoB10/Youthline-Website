@@ -7,7 +7,7 @@ use Illuminate\Support\Collection;
 
 /**
  * Outstanding fee balances: what Youthline has agreed to pay (approved fees)
- * minus what it has actually paid. Payments awaiting approval, rejected or in
+ * minus what it has actually paid. Rejected payments or ones marked as an
  * error do not reduce a balance.
  */
 class BalanceService
@@ -48,7 +48,6 @@ class BalanceService
                     'terms' => $fees->map(fn (Fee $fee) => $this->termLabel($fee))->unique()->values()->all(),
                     'share' => round($fees->sum(fn (Fee $fee) => (float) $fee->youthline_share), 2),
                     'paid' => round($fees->sum(fn (Fee $fee) => $fee->paidTotal()), 2),
-                    'awaiting_approval' => round($fees->sum(fn (Fee $fee) => $fee->pendingTotal()), 2),
                     'balance' => round($fees->sum(fn (Fee $fee) => $fee->balance()), 2),
                 ];
             })

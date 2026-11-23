@@ -61,6 +61,8 @@ class ChangeStudentStatusRequest extends FormRequest
                         'status',
                         "A student who is {$student->status->label()} can't be changed to {$to->label()}."
                     );
+                } elseif ($to && ! in_array($to, $student->availableStatuses(), true)) {
+                    $validator->errors()->add('status', 'Only students in Year 4 or Year 5 can be marked as graduated.');
                 }
             },
         ];
