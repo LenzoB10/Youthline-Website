@@ -9,3 +9,6 @@
 /.github export-ignore
 CHANGELOG.md export-ignore
 .styleci.yml export-ignore
+
+# Shell scripts run on Linux servers (e.g. Render): always store them with LF line endings.
+*.sh text eol=lf

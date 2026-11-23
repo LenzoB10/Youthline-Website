@@ -1,0 +1,46 @@
+# Render Blueprint for the Youthline demo site.
+# In Render: New + -> Blueprint -> pick this repository -> Apply.
+#
+# Free plan: the site sleeps after ~15 minutes without visitors, and the database is rebuilt
+# with sample data on every start (no permanent disk), so anything entered is temporary.
+services:
+  - type: web
+    name: youthline
+    runtime: docker
+    plan: free
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /up
+    envVars:
+      - key: APP_NAME
+        value: Youthline
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: warning
+      - key: DB_CONNECTION
+        value: sqlite
+      - key: SESSION_DRIVER
+        value: database
+      - key: CACHE_STORE
+        value: file
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: MAIL_MAILER
+        value: log
+      - key: FILESYSTEM_DISK
+        value: local
+      - key: TELESCOPE_ENABLED
+        value: "false"
+      # Sign-in for the demo admin. Render generates strong passwords; read them in the
+      # Render dashboard (service -> Environment). They are never stored in the code.
+      - key: ADMIN_EMAIL
+        value: lenabekelesi@gmail.com
+      - key: ADMIN_PASSWORD
+        generateValue: true
+      - key: MANAGER_PASSWORD
+        generateValue: true

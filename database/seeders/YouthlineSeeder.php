@@ -59,14 +59,31 @@ class YouthlineSeeder extends Seeder
         $this->seedPublicSubmissions();
     }
 
+    /**
+     * The password for a seeded account: taken from the given environment variable, or a strong
+     * random one that is printed once so it can be noted down. Never a fixed password in the code.
+     */
+    public static function password(string $envKey, string $who, ?\Illuminate\Console\Command $command = null): string
+    {
+        $password = env($envKey);
+        if (filled($password)) {
+            return $password;
+        }
+
+        $password = \Illuminate\Support\Str::password(20);
+        $command?->warn("{$who} password (set {$envKey} to choose your own): {$password}");
+
+        return $password;
+    }
+
     // ---------------------------------------------------------------
     // Users & roles
     // ---------------------------------------------------------------
     protected function seedUsers(): void
     {
         $this->admin = User::firstOrCreate(
-            ['email' => 'lenabekelesi@gmail.com'],
-            ['name' => 'Promis Mphoola', 'password' => Hash::make('1234567890'), 'status' => 'active']
+            ['email' => env('ADMIN_EMAIL', 'lenabekelesi@gmail.com')],
+            ['name' => 'Promis Mphoola', 'password' => Hash::make(self::password('ADMIN_PASSWORD', 'Admin', $this->command)), 'status' => 'active']
         );
 
         $managerRole = Role::firstOrCreate(['name' => 'Manager']);
@@ -74,7 +91,7 @@ class YouthlineSeeder extends Seeder
 
         $this->manager = User::firstOrCreate(
             ['email' => 'manager@youthline.org'],
-            ['name' => 'Grace Banda', 'password' => Hash::make('password'), 'status' => 'active']
+            ['name' => 'Grace Banda', 'password' => Hash::make(self::password('MANAGER_PASSWORD', 'Manager', $this->command)), 'status' => 'active']
         );
         $this->manager->assignRole('Manager');
     }

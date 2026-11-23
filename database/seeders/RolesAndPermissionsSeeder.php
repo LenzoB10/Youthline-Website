@@ -112,7 +112,7 @@ class RolesAndPermissionsSeeder extends Seeder
         Role::updateOrCreate(['name' => 'Manager'])
             ->givePermissionTo([...$managerStudentPermissions, ...$managerAcademicPermissions, ...$managerSupportPermissions, ...$managerReportingPermissions, 'manage website content']);
 
-        $user = User::where('email', 'lenabekelesi@gmail.com')->first();
+        $user = User::where('email', env('ADMIN_EMAIL', 'lenabekelesi@gmail.com'))->first();
         if ($user) {
             $user->assignRole('Admin');
         }
