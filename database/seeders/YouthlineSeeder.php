@@ -65,7 +65,7 @@ class YouthlineSeeder extends Seeder
     protected function seedUsers(): void
     {
         $this->admin = User::firstOrCreate(
-            ['email' => 'promisemphoola2@gmail.com'],
+            ['email' => 'lenabekelesi@gmail.com'],
             ['name' => 'Promis Mphoola', 'password' => Hash::make('1234567890'), 'status' => 'active']
         );
 
