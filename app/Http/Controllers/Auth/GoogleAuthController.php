@@ -24,26 +24,24 @@ class GoogleAuthController extends Controller
         try {
             $googleUser = Socialite::driver('google')->user();
 
-            $user = User::updateOrCreate(
-                ['email' => $googleUser->getEmail()],
-                [
-                    'name' => $googleUser->getName(),
-                    'google_id' => $googleUser->getId(),
-                    'email_verified_at' => now(),
-                ]
-            );
-
-            if ($user->wasRecentlyCreated) {
-                activity()
-                    ->causedBy($user)
-                    ->event('Register')
-                    ->log('User registered with Google');
-            } else {
-                activity()
-                    ->causedBy($user)
-                    ->event('Login')
-                    ->log('User logged in with Google');
+            // Google sign-in is only for people who already have a Youthline account
+            // (created by the Admin). It never creates a new account.
+            $user = User::query()->where('email', $googleUser->getEmail())->first();
+            if (! $user) {
+                return redirect()->route('login')->with([
+                    'error' => 'There is no Youthline account for this Google email. Ask the administrator to create one.',
+                ]);
             }
+
+            // Signing in with Google proves the person controls this email address.
+            if (! $user->email_verified_at) {
+                $user->forceFill(['email_verified_at' => now()])->save();
+            }
+
+            activity()
+                ->causedBy($user)
+                ->event('Login')
+                ->log('User logged in with Google');
 
             if ($user->status === 'inactive') {
                 Auth::logout();

@@ -10,6 +10,10 @@ import { Head, Link, useForm } from '@inertiajs/vue3';
 import FlashedError from '@/Components/FormElements/FlashedError.vue';
 
 defineProps({
+    googleLogin: {
+        type: Boolean,
+        default: false,
+    },
     canResetPassword: {
         type: Boolean,
     },
@@ -91,19 +95,12 @@ const submit = () => {
                 </PrimaryButton>
             </div>
 
-            <GoogleAuth />
+            <!-- Only shown when Google sign-in is set up -->
+            <GoogleAuth v-if="googleLogin" />
 
-            <div
-                class="mt-6 text-center text-sm text-gray-600 dark:text-gray-400"
-            >
-                Don't have an account?
-                <Link
-                    :href="route('register')"
-                    class="text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 font-medium"
-                >
-                    Register here
-                </Link>
-            </div>
+            <p class="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+                Accounts are created by the Youthline administrator.
+            </p>
         </form>
     </GuestLayout>
 </template>

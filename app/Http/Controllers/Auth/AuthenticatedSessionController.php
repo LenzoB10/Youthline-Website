@@ -20,6 +20,8 @@ class AuthenticatedSessionController extends Controller
     {
         return Inertia::render('Auth/Login', [
             'canResetPassword' => Route::has('password.request'),
+            // The Google button only appears when Google sign-in has been configured.
+            'googleLogin' => filled(config('services.google.client_id')),
             'status' => session('status'),
         ]);
     }
